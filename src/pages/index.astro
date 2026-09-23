@@ -1,0 +1,246 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import TileCard from '../components/TileCard.astro';
+import ValueProps from '../components/ValueProps.astro';
+import PostCard from '../components/PostCard.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import { allProducts, allCategories, allCollections, allPosts, inCategory, inCollection } from '../lib/catalog';
+import { categoryUrl, collectionUrl } from '../lib/urls';
+import { whatsappLink, messages } from '../lib/contact';
+import { faqPage } from '../lib/schema';
+import { generalFaq } from '../config/faq';
+import hero from '../assets/placeholders/hero.svg';
+import bridal from '../assets/placeholders/banner-bridal.svg';
+
+const [products, categories, collections, posts] = await Promise.all([allProducts(), allCategories(), allCollections(), allPosts()]);
+const catName = Object.fromEntries(categories.map((c) => [c.id, c.data.name]));
+const featured = products.filter((p) => p.data.featured).slice(0, 8);
+const styles = collections.filter((c) => c.data.group === 'style');
+const occasions = collections.filter((c) => c.data.group === 'occasion');
+const homeFaq = generalFaq.slice(0, 5);
+---
+<BaseLayout
+  title="Imitation Jewellery Online | Earrings, Sets & Bridal | Royalty"
+  description="Kundan, American diamond, temple and oxidised imitation jewellery by Royalty. Earrings, necklace sets, bangles and bridal pieces. Ask price on WhatsApp."
+  schema={[faqPage(homeFaq)]}
+>
+  <!-- Hero: what we sell + how to buy, visible within the first screen -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Imitation jewellery · Made to be noticed</span>
+        <h1 class="display">Imitation jewellery for weddings, festivals &amp; every day</h1>
+        <p class="lede">Kundan, American diamond, temple and oxidised designs, chosen piece by piece. See any design on video and get the price on WhatsApp before you buy.</p>
+        <div class="btn-row">
+          <a class="btn" href="/imitation-jewellery/">Explore the collection</a>
+          <a class="btn btn--whatsapp" href={whatsappLink(messages.general())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="hero"><Icon name="whatsapp" /> Ask on WhatsApp</a>
+        </div>
+        <a class="link-arrow cat-link" href="/catalogue/" data-track="catalogue_cta_click" data-location="hero">Request our latest catalogue</a>
+      </div>
+      <div class="hero-media">
+        <Image src={hero} alt="Gold-tone necklace with a centre drop and a pair of jhumka earrings" widths={[640, 960, 1400]} sizes="(min-width: 960px) 55vw, 100vw" loading="eager" fetchpriority="high" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section--tight">
+    <div class="container"><ValueProps /></div>
+  </section>
+
+  <!-- Categories -->
+  <section class="section" aria-labelledby="cat-h">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Shop by category</span>
+          <h2 id="cat-h">Find the piece you have in mind</h2>
+        </div>
+        <a class="link-arrow" href="/imitation-jewellery/">View all jewellery</a>
+      </div>
+      <div class="grid grid--3 cats">
+        {categories.map((c) => (
+          <TileCard href={categoryUrl(c.id)} title={c.data.name} image={c.data.image} alt={c.data.imageAlt} count={inCategory(products, c.id).length} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured -->
+  <section class="section section--surface" aria-labelledby="feat-h">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Featured designs</span>
+          <h2 id="feat-h">Pieces we would wear right now</h2>
+          <p class="lede">Tap any design to see details, or ask on WhatsApp for the price, stock and a video.</p>
+        </div>
+        <a class="link-arrow" href="/imitation-jewellery/">Shop all designs</a>
+      </div>
+      <div class="grid grid--products">
+        {featured.map((p) => <ProductCard product={p} categoryName={catName[p.data.category.id]} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Bridal editorial -->
+  <section class="bridal section--noir" aria-labelledby="bridal-h">
+    <div class="bridal-media">
+      <Image src={bridal} alt="Bridal necklace, maang tikka and jhumka laid out on a dark background" widths={[800, 1200, 1600]} sizes="(min-width: 960px) 55vw, 100vw" loading="lazy" />
+    </div>
+    <div class="bridal-copy" data-reveal>
+      <span class="eyebrow">The bridal edit</span>
+      <h2 id="bridal-h">A different look for every function</h2>
+      <p class="lede">Heavy kundan for the pheras, sparkling AD for the reception, and something light for the mehendi. Plan the full wedding wardrobe with us on WhatsApp.</p>
+      <ul class="ticks">
+        <li><Icon name="check" size={18} /> Necklace sets, tikkas, jhumkas and kadas</li>
+        <li><Icon name="check" size={18} /> Matching sets for bridesmaids</li>
+        <li><Icon name="check" size={18} /> Send your outfit photo for suggestions</li>
+      </ul>
+      <div class="btn-row">
+        <a class="btn btn--light" href={collectionUrl('bridal-jewellery')}>Explore bridal jewellery</a>
+        <a class="btn btn--ghost-light" href="/blog/bridal-imitation-jewellery-guide/">Read the bridal guide</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Styles -->
+  <section class="section" aria-labelledby="style-h">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Shop by style</span>
+          <h2 id="style-h">Kundan, AD, temple or oxidised?</h2>
+          <p class="lede">Each style has its own mood. Pick the one that fits your outfit and the occasion.</p>
+        </div>
+        <a class="link-arrow" href="/collections/">All collections</a>
+      </div>
+      <div class="styles">
+        {styles.map((c) => (
+          <TileCard href={collectionUrl(c.id)} title={c.data.name} image={c.data.image} alt={c.data.imageAlt} kicker="Style" count={inCollection(products, c.id).length} />
+        ))}
+      </div>
+      <ul class="occasions" aria-label="Shop by occasion">
+        {occasions.map((c) => <li><a href={collectionUrl(c.id)}>{c.data.name}</a></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- How to buy -->
+  <section class="section section--surface" aria-labelledby="how-h">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <div>
+          <span class="eyebrow">How to order</span>
+          <h2 id="how-h">Three steps, one chat</h2>
+          <p class="lede">No accounts, no long checkout. Just talk to us.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li data-reveal><span class="n">01</span><h3>Choose a design</h3><p>Browse by category, style or occasion and note the product code.</p></li>
+        <li data-reveal><span class="n">02</span><h3>Ask on WhatsApp</h3><p>Tap the WhatsApp button. We reply with the price, stock and a video of the piece.</p></li>
+        <li data-reveal><span class="n">03</span><h3>Confirm your order</h3><p>Agree on payment and delivery on the same chat. We keep you updated until it reaches you.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Bulk & gifting -->
+  <section class="section" aria-labelledby="bulk-h">
+    <div class="container bulk">
+      <div data-reveal>
+        <span class="eyebrow">Bulk &amp; gifting</span>
+        <h2 id="bulk-h">Buying for bridesmaids, return gifts or a team?</h2>
+        <p class="lede">Tell us the occasion, the number of pieces and your budget per piece. We will suggest matching designs and confirm availability for the full quantity.</p>
+      </div>
+      <div class="btn-row">
+        <a class="btn" href="/bulk-and-gifting-orders/">Send your requirement</a>
+        <a class="btn btn--outline" href={whatsappLink(messages.bulk())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="home_bulk"><Icon name="whatsapp" /> Discuss on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Journal -->
+  <section class="section section--surface" aria-labelledby="blog-h">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">The journal</span>
+          <h2 id="blog-h">Guides to choosing and wearing jewellery</h2>
+        </div>
+        <a class="link-arrow" href="/blog/">All articles</a>
+      </div>
+      <div class="grid grid--3">
+        {posts.slice(0, 3).map((p) => <PostCard post={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container faq-wrap">
+      <FaqList items={homeFaq} />
+      <p><a class="link-arrow" href="/faq/">See all questions</a></p>
+    </div>
+  </section>
+
+  <CtaBand location="home_band" />
+</BaseLayout>
+
+<style>
+  .hero { padding: var(--s-6) 0 var(--s-7); }
+  .hero-grid { display: grid; gap: var(--s-6); align-items: center; }
+  .display { font-size: var(--fs-display); line-height: 1.02; margin-bottom: var(--s-5); max-width: 13ch; }
+  .hero-copy .lede { margin-bottom: var(--s-6); }
+  .cat-link { margin-top: var(--s-5); }
+  .hero-media { order: -1; aspect-ratio: 16 / 11; overflow: hidden; border-radius: var(--radius); background: var(--surface); }
+  .hero-media :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  @media (min-width: 960px) {
+    .hero { padding: var(--s-7) 0 var(--s-8); }
+    .hero-grid { grid-template-columns: 1fr 1.15fr; gap: var(--s-8); }
+    .hero-media { order: 0; aspect-ratio: 16 / 12; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-copy > * { animation: rise 0.9s var(--ease) both; }
+    .hero-copy > :nth-child(2) { animation-delay: 0.06s; }
+    .hero-copy > :nth-child(3) { animation-delay: 0.12s; }
+    .hero-copy > :nth-child(4) { animation-delay: 0.18s; }
+    .hero-media :global(img) { animation: settle 1.6s var(--ease) both; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+  @keyframes settle { from { transform: scale(1.06); } }
+
+  .cats { grid-template-columns: repeat(2, 1fr); gap: var(--s-3); }
+  @media (min-width: 1024px) { .cats { grid-template-columns: repeat(3, 1fr); gap: var(--s-5); } }
+
+  .bridal { display: grid; }
+  .bridal-media { min-height: 320px; }
+  .bridal-media :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .bridal-copy { padding: var(--s-8) var(--gutter); max-width: 620px; }
+  .bridal-copy h2 { color: #fff; }
+  .ticks { list-style: none; padding: 0; margin: var(--s-5) 0 var(--s-6); display: grid; gap: var(--s-3); }
+  .ticks li { display: flex; gap: var(--s-3); align-items: center; }
+  .ticks :global(svg) { color: var(--gold-soft); flex: none; }
+  @media (min-width: 960px) { .bridal { grid-template-columns: 1.1fr 1fr; align-items: center; } .bridal-media { height: 100%; } .bridal-copy { padding: var(--s-9) var(--s-8); } }
+
+  .styles { display: grid; grid-auto-flow: column; grid-auto-columns: 72%; gap: var(--s-3); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--s-3); margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scrollbar-width: thin; }
+  .styles > :global(*) { scroll-snap-align: start; }
+  @media (min-width: 720px) { .styles { grid-auto-columns: 40%; } }
+  @media (min-width: 1100px) { .styles { grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); overflow: visible; margin: 0; padding: 0; gap: var(--s-4); } }
+  .occasions { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; padding: 0; margin: var(--s-6) 0 0; }
+  .occasions a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s-5); border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: 0.875rem; transition: border-color 0.2s, background 0.2s; }
+  .occasions a:hover { border-color: var(--ink); background: #fff; }
+
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-6); counter-reset: s; }
+  @media (min-width: 860px) { .steps { grid-template-columns: repeat(3, 1fr); gap: var(--s-7); } }
+  .steps li { border-top: 1px solid var(--gold); padding-top: var(--s-5); }
+  .n { font-family: var(--font-serif); font-size: 2.6rem; color: var(--gold-text); line-height: 1; display: block; margin-bottom: var(--s-3); }
+  .steps p { color: var(--muted); margin: 0; }
+
+  .bulk { display: grid; gap: var(--s-6); align-items: end; }
+  .bulk h2 { max-width: 20ch; }
+  @media (min-width: 960px) { .bulk { grid-template-columns: 1.4fr 1fr; } .bulk .btn-row { justify-content: flex-end; } }
+
+  .faq-wrap { display: grid; gap: var(--s-5); }
+</style>

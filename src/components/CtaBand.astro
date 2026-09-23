@@ -1,0 +1,41 @@
+---
+import { whatsappLink, messages } from '../lib/contact';
+import Icon from './Icon.astro';
+
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  text?: string;
+  message?: string;
+  location: string;
+  secondary?: { label: string; href: string; track?: string };
+}
+const {
+  eyebrow = 'Personal assistance',
+  title = 'Found something you like? Ask us on WhatsApp.',
+  text = 'Send a screenshot or a product code. We will share the price, more photos and a video of the piece so you know exactly what you are getting.',
+  message = messages.general(),
+  location,
+  secondary = { label: 'Request catalogue', href: '/catalogue/', track: 'catalogue_cta_click' },
+} = Astro.props;
+---
+<section class="band section--noir">
+  <div class="container inner" data-reveal>
+    <div>
+      <span class="eyebrow">{eyebrow}</span>
+      <h2>{title}</h2>
+      <p class="lede">{text}</p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn--whatsapp" href={whatsappLink(message)} target="_blank" rel="noopener" data-track="whatsapp_click" data-location={location}><Icon name="whatsapp" /> Chat on WhatsApp</a>
+      <a class="btn btn--ghost-light" href={secondary.href} data-track={secondary.track} data-location={location}>{secondary.label}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: clamp(3.5rem, 2.5rem + 4vw, 6rem); }
+  .inner { display: grid; gap: var(--s-6); align-items: end; }
+  h2 { max-width: 18ch; color: #fff; }
+  @media (min-width: 900px) { .inner { grid-template-columns: 1.4fr 1fr; } .btn-row { justify-content: flex-end; } }
+</style>

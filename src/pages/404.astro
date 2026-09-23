@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { allCategories } from '../lib/catalog';
+import { categoryUrl } from '../lib/urls';
+
+const categories = await allCategories();
+---
+<BaseLayout title="Page not found | Royalty" description="This page could not be found. Browse Royalty imitation jewellery or search by product code." noindex>
+  <section class="container nf">
+    <p class="eyebrow">404</p>
+    <h1>This page has moved or no longer exists</h1>
+    <p class="lede">The design may have sold out or the link may be old. Try searching by name or product code, or browse a category.</p>
+    <div class="btn-row">
+      <a class="btn" href="/imitation-jewellery/">Browse all jewellery</a>
+      <a class="btn btn--outline" href="/search/">Search</a>
+    </div>
+    <ul>{categories.map((c) => <li><a href={categoryUrl(c.id)}>{c.data.name}</a></li>)}</ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { padding-block: var(--section); text-align: center; }
+  .nf h1, .nf .lede { margin-inline: auto; max-width: 22ch; }
+  .nf .lede { max-width: 52ch; }
+  .btn-row { justify-content: center; margin: var(--s-6) 0; }
+  ul { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-4); list-style: none; padding: 0; }
+  ul a { color: var(--gold-text); }
+</style>

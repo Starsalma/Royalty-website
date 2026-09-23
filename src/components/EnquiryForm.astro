@@ -1,0 +1,158 @@
+---
+/**
+ * Short enquiry form. Without a form backend it composes the enquiry into a
+ * WhatsApp message (the channel buyers actually answer on). With
+ * site.formEndpoint set it POSTs JSON there first, then offers WhatsApp.
+ */
+import { site } from '../config/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  kind?: 'product' | 'general' | 'bulk' | 'catalogue';
+  product?: string; // "Name (Code: SKU)"
+  heading?: string;
+  intro?: string;
+  id?: string;
+}
+const { kind = 'general', product = '', heading, intro, id = 'enquiry' } = Astro.props;
+
+const event = { product: 'product_enquiry', general: 'quote_form_submit', bulk: 'quote_form_submit', catalogue: 'catalogue_request' }[kind];
+const submitLabel = { product: 'Get price & availability', general: 'Send enquiry', bulk: 'Request a quote', catalogue: 'Request catalogue' }[kind];
+const showQty = kind === 'product' || kind === 'bulk';
+const messagePlaceholder = {
+  product: 'Colour preference, occasion, delivery date…',
+  general: 'Tell us what you are looking for',
+  bulk: 'Occasion, number of pieces, budget per piece, delivery date',
+  catalogue: 'Anything specific? e.g. bridal sets, earrings under a budget',
+}[kind];
+---
+<form class="enquiry" id={id} data-enquiry data-event={event} data-kind={kind} data-endpoint={site.formEndpoint} data-wa={site.whatsappNumber} data-brand={site.name} novalidate>
+  {heading && <h2 class="h">{heading}</h2>}
+  {intro && <p class="intro">{intro}</p>}
+
+  <div class="fields">
+    <div class="field">
+      <label for={`${id}-name`}>Your name <span aria-hidden="true">*</span></label>
+      <input id={`${id}-name`} name="name" type="text" autocomplete="name" required maxlength="80" />
+    </div>
+    <div class="field">
+      <label for={`${id}-phone`}>WhatsApp number <span aria-hidden="true">*</span></label>
+      <input id={`${id}-phone`} name="phone" type="tel" inputmode="tel" autocomplete="tel" required pattern="[0-9+\\s\\-]{10,16}" placeholder="10-digit mobile number" />
+    </div>
+    <div class="field">
+      <label for={`${id}-city`}>City</label>
+      <input id={`${id}-city`} name="city" type="text" autocomplete="address-level2" maxlength="60" />
+    </div>
+    {showQty && (
+      <div class="field">
+        <label for={`${id}-qty`}>Quantity</label>
+        <input id={`${id}-qty`} name="quantity" type="number" inputmode="numeric" min="1" max="100000" value={kind === 'product' ? '1' : ''} />
+      </div>
+    )}
+    {(kind === 'product' || product) && (
+      <div class="field full">
+        <label for={`${id}-product`}>Product</label>
+        <input id={`${id}-product`} name="product" type="text" value={product} maxlength="140" />
+      </div>
+    )}
+    <div class="field full">
+      <label for={`${id}-message`}>Message</label>
+      <textarea id={`${id}-message`} name="message" rows="3" maxlength="800" placeholder={messagePlaceholder}></textarea>
+    </div>
+  </div>
+
+  <button class="btn btn--gold btn--block" type="submit"><Icon name="whatsapp" /> {submitLabel}</button>
+  <p class="note">We reply on WhatsApp. Your number is used only to answer this enquiry. See our <a href="/privacy-policy/">privacy policy</a>.</p>
+  <p class="status" role="status" aria-live="polite" data-status></p>
+</form>
+
+<style>
+  .enquiry { background: #fff; border: 1px solid var(--line); padding: clamp(1.25rem, 1rem + 1.5vw, 2.25rem); border-radius: var(--radius-lg); }
+  .h { font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem); margin-bottom: var(--s-2); }
+  .intro { color: var(--muted); margin-bottom: var(--s-5); }
+  .fields { display: grid; grid-template-columns: 1fr; gap: var(--s-4); margin-bottom: var(--s-5); }
+  @media (min-width: 560px) { .fields { grid-template-columns: 1fr 1fr; } .full { grid-column: 1 / -1; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 0.8125rem; font-weight: 600; }
+  label span { color: var(--gold-text); }
+  input, textarea { width: 100%; min-height: 48px; padding: 0.7rem 0.85rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--ivory); font-size: 1rem; transition: border-color 0.2s, background 0.2s; }
+  textarea { resize: vertical; min-height: 96px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--ink); background: #fff; }
+  input[aria-invalid='true'] { border-color: var(--danger); }
+  .note { font-size: 0.75rem; color: var(--muted); margin: var(--s-3) 0 0; }
+  .note a { color: inherit; }
+  .status { margin: var(--s-3) 0 0; font-size: 0.875rem; font-weight: 500; }
+  .status:empty { display: none; }
+  .status.error { color: var(--danger); }
+  .status.ok { color: var(--whatsapp); }
+</style>
+
+<script>
+  import { track } from '../scripts/analytics';
+
+  document.querySelectorAll<HTMLFormElement>('form[data-enquiry]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const setStatus = (text: string, kind: 'ok' | 'error' | '' = '') => { status.textContent = text; status.className = `status ${kind}`; };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+      const phone = form.elements.namedItem('phone') as HTMLInputElement;
+      const name = form.elements.namedItem('name') as HTMLInputElement;
+
+      let invalid: HTMLInputElement | null = null;
+      [name, phone].forEach((el) => {
+        const bad = !el.checkValidity() || (el === phone && data.phone.replace(/\D/g, '').length < 10);
+        el.setAttribute('aria-invalid', String(bad));
+        if (bad && !invalid) invalid = el;
+      });
+      if (invalid) {
+        setStatus('Please add your name and a valid WhatsApp number.', 'error');
+        (invalid as HTMLInputElement).focus();
+        return;
+      }
+
+      const brand = form.dataset.brand;
+      const lines = [
+        `Hi ${brand}, I have an enquiry from your website.`,
+        data.product && `Product: ${data.product}`,
+        data.quantity && `Quantity: ${data.quantity}`,
+        `Name: ${data.name}`,
+        data.city && `City: ${data.city}`,
+        `WhatsApp: ${data.phone}`,
+        data.message && `Message: ${data.message}`,
+      ].filter(Boolean);
+      const text = encodeURIComponent(lines.join('\n'));
+      const waUrl = form.dataset.wa ? `https://wa.me/${form.dataset.wa}?text=${text}` : `https://wa.me/?text=${text}`;
+
+      track(form.dataset.event!, { form_kind: form.dataset.kind, product: data.product || undefined, quantity: data.quantity || undefined });
+
+      const endpoint = form.dataset.endpoint;
+      if (endpoint) {
+        const button = form.querySelector('button[type=submit]') as HTMLButtonElement;
+        button.disabled = true;
+        try {
+          const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ ...data, page: location.pathname, kind: form.dataset.kind }) });
+          if (!res.ok) throw new Error(String(res.status));
+          form.reset();
+          setStatus('Thank you. We have your enquiry and will reply on WhatsApp soon.', 'ok');
+          const link = document.createElement('a');
+          link.href = waUrl; link.target = '_blank'; link.rel = 'noopener'; link.textContent = ' Want a faster reply? Message us on WhatsApp.';
+          status.append(link);
+        } catch {
+          setStatus('Could not send the form. Opening WhatsApp instead…', 'error');
+          window.location.href = waUrl;
+        } finally {
+          button.disabled = false;
+        }
+        return;
+      }
+
+      setStatus('Opening WhatsApp with your enquiry. Just press send.', 'ok');
+      // No 'noopener' feature string: with it window.open always returns null and we could not detect a blocked popup.
+      const win = window.open(waUrl, '_blank');
+      if (win) win.opener = null;
+      else window.location.href = waUrl;
+    });
+  });
+</script>

@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { generalFaq } from '../config/faq';
+import { faqPage } from '../lib/schema';
+
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'FAQ', href: '/faq/' }];
+---
+<BaseLayout
+  title="FAQ | Ordering, Prices, Videos & Care | Royalty Imitation Jewellery"
+  description="Answers to common questions about ordering Royalty imitation jewellery on WhatsApp, prices, product videos, bulk orders and caring for your jewellery."
+  crumbs={crumbs}
+  schema={[faqPage(generalFaq)]}
+>
+  <PageIntro eyebrow="Help" title="Frequently asked questions" intro="Cannot find your answer? Ask us on WhatsApp and we will reply personally." />
+  <section class="container list">
+    <FaqList items={generalFaq} heading="Ordering and products" />
+    <p class="more">More help: <a href="/shipping-and-returns/">shipping &amp; returns</a> · <a href="/blog/how-to-care-for-imitation-jewellery/">jewellery care guide</a> · <a href="/bulk-and-gifting-orders/">bulk &amp; gifting orders</a></p>
+  </section>
+  <CtaBand location="faq_band" title="Still have a question?" />
+</BaseLayout>
+
+<style>
+  .list { padding-bottom: var(--section); }
+  .more { margin-top: var(--s-6); color: var(--muted); }
+  .more a { color: var(--gold-text); }
+</style>

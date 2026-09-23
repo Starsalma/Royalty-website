@@ -1,0 +1,98 @@
+---
+import { site } from '../config/site';
+import { allCategories, allCollections } from '../lib/catalog';
+import { categoryUrl, collectionUrl } from '../lib/urls';
+import { whatsappLink, messages, telLink, hasPhone } from '../lib/contact';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+
+const categories = await allCategories();
+const collections = (await allCollections()).slice(0, 6);
+const socials = (Object.entries(site.social) as [keyof typeof site.social, string][]).filter(([, url]) => url);
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="container">
+    <div class="top">
+      <div class="about">
+        <Logo light />
+        <p>{site.description}</p>
+        <div class="btn-row">
+          <a class="btn btn--whatsapp btn--sm" href={whatsappLink(messages.general())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="footer"><Icon name="whatsapp" /> WhatsApp us</a>
+          {hasPhone && <a class="btn btn--ghost-light btn--sm" href={telLink()} data-track="phone_click" data-location="footer"><Icon name="phone" /> Call</a>}
+        </div>
+        {socials.length > 0 && (
+          <ul class="socials" aria-label="Social media">
+            {socials.map(([name, url]) => (
+              <li><a href={url} target="_blank" rel="noopener me" aria-label={name} data-track="social_click" data-location={name}><Icon name={name} /></a></li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <nav aria-label="Shop by category">
+        <h2>Shop</h2>
+        <ul>
+          <li><a href="/imitation-jewellery/">All imitation jewellery</a></li>
+          {categories.map((c) => <li><a href={categoryUrl(c.id)}>{c.data.name}</a></li>)}
+        </ul>
+      </nav>
+      <nav aria-label="Collections">
+        <h2>Collections</h2>
+        <ul>
+          {collections.map((c) => <li><a href={collectionUrl(c.id)}>{c.data.name}</a></li>)}
+          <li><a href="/collections/">All collections</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Help">
+        <h2>Help</h2>
+        <ul>
+          <li><a href="/contact/">Contact us</a></li>
+          <li><a href="/faq/">FAQ</a></li>
+          <li><a href="/catalogue/">Request catalogue</a></li>
+          <li><a href="/bulk-and-gifting-orders/">Bulk &amp; gifting orders</a></li>
+          <li><a href="/shipping-and-returns/">Shipping &amp; returns</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Company">
+        <h2>Company</h2>
+        <ul>
+          <li><a href="/about/">About Royalty</a></li>
+          <li><a href="/blog/">Journal</a></li>
+          <li><a href="/privacy-policy/">Privacy policy</a></li>
+          <li><a href="/terms-and-conditions/">Terms &amp; conditions</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="bottom">
+      <p>© {year} {site.legalName || site.name}. All rights reserved.</p>
+      {(site.email || site.city) && (
+        <p>
+          {site.email && <a href={`mailto:${site.email}`} data-track="email_click" data-location="footer">{site.email}</a>}
+          {site.email && site.city && ' · '}
+          {site.city && <span>{site.city}, {site.country}</span>}
+        </p>
+      )}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { background: var(--noir); color: #cfc6b8; padding: var(--s-9) 0 calc(var(--s-6) + 72px); font-size: 0.9375rem; }
+  @media (min-width: 900px) { .footer { padding-bottom: var(--s-6); } }
+  .top { display: grid; gap: var(--s-7) var(--s-5); grid-template-columns: repeat(2, 1fr); }
+  .about { grid-column: 1 / -1; max-width: 420px; }
+  .about p { margin: var(--s-5) 0; color: #b9b0a2; }
+  @media (min-width: 1000px) { .top { grid-template-columns: 1.6fr repeat(4, 1fr); } .about { grid-column: auto; } }
+  h2 { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-soft); margin-bottom: var(--s-4); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  nav li { margin-bottom: var(--s-2); }
+  a { text-decoration: none; }
+  nav a { display: inline-block; padding: 4px 0; }
+  a:hover { color: #fff; text-decoration: underline; }
+  .socials { display: flex; gap: var(--s-2); margin-top: var(--s-5); }
+  .socials a { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid rgb(255 255 255 / 0.2); border-radius: 50%; }
+  .bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-3); margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid rgb(255 255 255 / 0.12); font-size: 0.8125rem; color: #9d9486; }
+  .bottom p { margin: 0; }
+</style>

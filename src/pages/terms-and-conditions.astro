@@ -1,0 +1,26 @@
+---
+import PolicyLayout from '../layouts/PolicyLayout.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+---
+<PolicyLayout title="Terms & Conditions" seoTitle="Terms & Conditions | Royalty" description="The terms that apply when you browse the Royalty website and place orders for imitation jewellery with us." path="/terms-and-conditions/" updated="23 September 2026">
+  <p>These terms apply to your use of this website and to orders placed with {site.legalName || site.name}. <Todo text="Add registered business name, address and GSTIN if applicable" /></p>
+
+  <h2>Products</h2>
+  <p>All jewellery sold by us is imitation (fashion) jewellery. It is not made of solid gold, silver or precious gemstones unless a product page clearly says otherwise. Colours can look slightly different on different screens. Ask us for a video if you want to check a piece before ordering.</p>
+
+  <h2>Prices and orders</h2>
+  <p>Prices are confirmed on WhatsApp or on the product page at the time of your order. An order is confirmed only after we confirm availability and receive payment as agreed. <Todo text="Describe accepted payment methods" /></p>
+
+  <h2>Shipping, returns and exchanges</h2>
+  <p>See our <a href="/shipping-and-returns/">shipping and returns policy</a>.</p>
+
+  <h2>Use of this website</h2>
+  <p>Photos, text and designs on this website belong to {site.name} or are used with permission. Please do not copy them for commercial use without our written consent.</p>
+
+  <h2>Governing law</h2>
+  <p>These terms are governed by the laws of India. <Todo text="Add jurisdiction city" /></p>
+
+  <h2>Contact</h2>
+  <p>{site.email || <Todo text="Add contact email" />}</p>
+</PolicyLayout>

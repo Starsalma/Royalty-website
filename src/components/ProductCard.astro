@@ -1,0 +1,66 @@
+---
+import { Image } from 'astro:assets';
+import type { Product } from '../lib/catalog';
+import { formatPrice } from '../lib/catalog';
+import { productUrl } from '../lib/urls';
+import { whatsappLink, messages } from '../lib/contact';
+import Icon from './Icon.astro';
+
+interface Props { product: Product; categoryName: string; eager?: boolean; headingLevel?: 'h2' | 'h3' }
+const { product: p, categoryName, eager = false, headingLevel: H = 'h3' } = Astro.props;
+const d = p.data;
+const url = productUrl(p);
+const img = d.images[0];
+const hover = d.images[1];
+---
+<article
+  class="card"
+  data-card
+  data-category={d.category.id}
+  data-collections={d.collections.map((c) => c.id).join(' ')}
+  data-colours={d.colours.map((c) => c.toLowerCase()).join('|')}
+  data-price={d.price ?? ''}
+  data-date={d.publishedAt.getTime()}
+  data-featured={d.featured ? '1' : '0'}
+>
+  <a href={url} class="media" tabindex="-1" aria-hidden="true">
+    <Image src={img.src} alt={img.alt} widths={[360, 540, 720]} sizes="(min-width: 1100px) 300px, (min-width: 768px) 30vw, 48vw" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} />
+    {hover && <Image class="alt" src={hover.src} alt="" widths={[360, 540, 720]} sizes="(min-width: 1100px) 300px, (min-width: 768px) 30vw, 48vw" loading="lazy" />}
+    {d.bestseller && <span class="tag">Bestseller</span>}
+  </a>
+  <div class="body">
+    <p class="meta">{categoryName}<span aria-hidden="true"> · </span><span class="sku">{d.sku}</span></p>
+    <H class="name"><a href={url}>{d.name}</a></H>
+    <p class="summary">{d.summary}</p>
+    <p class="price">{d.price ? formatPrice(d.price) : 'Price on request'}</p>
+    <div class="cta">
+      <a class="btn btn--whatsapp btn--sm" href={whatsappLink(messages.product(d.name, d.sku))} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="product_card" data-product={d.sku} aria-label={`Ask about ${d.name} on WhatsApp`}>
+        <Icon name="whatsapp" /> <span>Ask</span>
+      </a>
+      <a class="btn btn--outline btn--sm" href={url}>Details</a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .card { display: flex; flex-direction: column; min-width: 0; }
+  .media { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface); border-radius: var(--radius); }
+  .media :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease), opacity 0.6s var(--ease); }
+  .media :global(.alt) { position: absolute; inset: 0; opacity: 0; }
+  @media (hover: hover) {
+    .card:hover .media :global(img) { transform: scale(1.04); }
+    .card:hover .media :global(.alt) { opacity: 1; }
+  }
+  .tag { position: absolute; top: 10px; left: 10px; background: var(--ivory); padding: 4px 10px; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+  .body { display: flex; flex-direction: column; flex: 1; padding-top: var(--s-4); }
+  .meta { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--s-2); }
+  .sku { letter-spacing: 0.06em; }
+  .name { font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem); margin-bottom: var(--s-2); }
+  .name a { text-decoration: none; }
+  .name a:hover { text-decoration: underline; text-decoration-color: var(--gold); }
+  .summary { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.875rem; color: var(--muted); margin-bottom: var(--s-3); }
+  .price { font-weight: 600; font-size: 0.9375rem; margin-bottom: var(--s-4); }
+  .cta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); margin-top: auto; }
+  .cta .btn { padding: 0 var(--s-2); letter-spacing: 0.08em; }
+  @media (max-width: 480px) { .summary { display: none; } }
+</style>

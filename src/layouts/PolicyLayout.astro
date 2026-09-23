@@ -1,0 +1,20 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+
+interface Props { title: string; seoTitle: string; description: string; path: string; updated: string }
+const { title, seoTitle, description, path, updated } = Astro.props;
+const crumbs = [{ name: 'Home', href: '/' }, { name: title, href: path }];
+---
+<BaseLayout title={seoTitle} description={description} crumbs={crumbs}>
+  <PageIntro eyebrow="Policies" title={title} intro={`Last updated: ${updated}`} />
+  <section class="container body">
+    <p class="review">Draft template. Replace every highlighted placeholder and have this page reviewed before launch.</p>
+    <div class="prose"><slot /></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .body { padding-bottom: var(--section); }
+  .review { display: inline-block; padding: var(--s-3) var(--s-4); background: #fff4d6; border: 1px dashed #c9a23a; color: #6b4e00; font-size: 0.875rem; margin-bottom: var(--s-6); }
+</style>

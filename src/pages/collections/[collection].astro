@@ -1,0 +1,70 @@
+---
+import { render } from 'astro:content';
+import { brandTitle } from '../../lib/seo';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import ProductListing from '../../components/ProductListing.astro';
+import LandingBody from '../../components/LandingBody.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { allProducts, allCategories, allCollections, allPosts, inCollection, facetsFor } from '../../lib/catalog';
+import { categoryUrl, collectionUrl, productUrl } from '../../lib/urls';
+import { whatsappLink, messages } from '../../lib/contact';
+import { itemList, faqPage } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const collections = await allCollections();
+  return collections.map((collection) => ({ params: { collection: collection.id }, props: { collection } }));
+}
+
+const { collection } = Astro.props;
+const d = collection.data;
+const [products, categories, collections, posts] = await Promise.all([allProducts(), allCategories(), allCollections(), allPosts()]);
+const items = inCollection(products, collection.id);
+const catName = Object.fromEntries(categories.map((c) => [c.id, c.data.name]));
+const facets = facetsFor(items, categories, collections, d.group === 'style' ? ['type', 'occasion', 'colour'] : ['type', 'style', 'colour']);
+const usedCats = categories.filter((c) => items.some((p) => p.data.category.id === c.id));
+const others = collections.filter((c) => c.id !== collection.id && c.data.group === d.group);
+const guides = posts.filter((p) => d.relatedPosts.some((r) => r.id === p.id) || p.data.relatedCollections.some((r) => r.id === collection.id));
+const { Content } = await render(collection);
+const url = collectionUrl(collection.id);
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Collections', href: '/collections/' }, { name: d.name, href: url }];
+---
+<BaseLayout
+  title={brandTitle(d.seoTitle)}
+  description={d.seoDescription}
+  image={d.image.src}
+  imageAlt={d.imageAlt}
+  crumbs={crumbs}
+  whatsappMessage={messages.category(d.name)}
+  schema={[itemList(d.h1, items.map(productUrl), Astro.site!), faqPage(d.faq)]}
+>
+  <PageIntro eyebrow={d.group === 'style' ? 'Shop by style' : 'Shop by occasion'} title={d.h1} intro={d.intro}>
+    <div class="btn-row intro-cta">
+      <a class="btn btn--whatsapp" href={whatsappLink(messages.category(d.name))} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="collection_intro"><Icon name="whatsapp" /> Ask on WhatsApp</a>
+      <a class="btn btn--outline" href="/catalogue/" data-track="catalogue_cta_click" data-location="collection_intro">Request catalogue</a>
+    </div>
+  </PageIntro>
+
+  <section class="container listing-wrap">
+    <h2 class="visually-hidden">{d.name} designs</h2>
+    <ProductListing products={items} categoryNames={catName} facets={facets} />
+  </section>
+
+  <LandingBody
+    name={d.name}
+    relatedHeading={d.group === 'style' ? 'More styles' : 'More occasions'}
+    related={[...others.map((c) => ({ label: c.data.name, href: collectionUrl(c.id) })), ...usedCats.map((c) => ({ label: `${d.name.replace(/ Jewellery$/, '')} ${c.data.name.toLowerCase()}`, href: categoryUrl(c.id) }))]}
+    posts={guides}
+    faq={d.faq}
+  >
+    <Content />
+  </LandingBody>
+
+  <CtaBand location="collection_band" message={messages.category(d.name)} />
+</BaseLayout>
+
+<style>
+  .intro-cta { margin-top: var(--s-5); }
+  .listing-wrap { padding-bottom: var(--section); }
+</style>

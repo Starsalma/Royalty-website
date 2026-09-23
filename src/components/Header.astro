@@ -1,0 +1,103 @@
+---
+import { nav, site } from '../config/site';
+import { whatsappLink, messages } from '../lib/contact';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/imitation-jewellery/' ? path === href : path.startsWith(href));
+---
+<header class="site-header" data-header>
+  <div class="announce">
+    <p>Ask for price, stock and photos on WhatsApp. We reply personally.</p>
+  </div>
+  <div class="container bar">
+    <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-toggle>
+      <Icon name="menu" size={22} />
+      <span class="visually-hidden">Open menu</span>
+    </button>
+
+    <a href="/" class="brand" aria-label={`${site.name} home`}><Logo /></a>
+
+    <nav class="primary" aria-label="Main">
+      <ul>
+        {nav.map((item) => (
+          <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <a class="icon-btn" href="/search/" aria-label="Search jewellery"><Icon name="search" size={21} /></a>
+      <a class="btn btn--sm btn--outline header-cta" href={whatsappLink(messages.general())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="header">
+        <Icon name="whatsapp" /> Enquire
+      </a>
+    </div>
+  </div>
+
+  <div class="mobile-nav" id="mobile-nav" hidden data-menu>
+    <nav aria-label="Mobile">
+      <ul>
+        {nav.map((item) => (
+          <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ))}
+        <li><a href="/catalogue/">Request Catalogue</a></li>
+        <li><a href="/about/">About Us</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--whatsapp btn--block" href={whatsappLink(messages.general())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="mobile_menu">
+      <Icon name="whatsapp" /> Chat on WhatsApp
+    </a>
+  </div>
+</header>
+
+<style>
+  .site-header { position: sticky; top: 0; z-index: 50; background: rgb(251 248 243 / 0.94); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; transition: border-color 0.3s; }
+  .site-header.is-scrolled { border-bottom-color: var(--line); }
+  .announce { background: var(--noir); color: #e9e1d3; text-align: center; font-size: 0.75rem; letter-spacing: 0.06em; padding: 0.5rem var(--gutter); }
+  .announce p { margin: 0; }
+  .bar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; height: var(--header-h); gap: var(--s-4); }
+  .brand { justify-self: center; text-decoration: none; }
+  .primary { display: none; }
+  .actions { display: flex; align-items: center; gap: var(--s-2); justify-self: end; }
+  .header-cta { display: none; }
+  .icon-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; background: none; border: 0; cursor: pointer; color: var(--ink); border-radius: 50%; }
+  .icon-btn:hover { background: var(--surface); }
+
+  .mobile-nav { border-top: 1px solid var(--line); padding: var(--s-4) var(--gutter) var(--s-6); background: var(--ivory); max-height: calc(100dvh - var(--header-h) - 32px); overflow-y: auto; }
+  .mobile-nav ul { list-style: none; margin: 0 0 var(--s-5); padding: 0; }
+  .mobile-nav a:not(.btn) { display: block; padding: var(--s-3) 0; font-family: var(--font-serif); font-size: 1.5rem; text-decoration: none; border-bottom: 1px solid var(--line); }
+  .mobile-nav a[aria-current='page'] { color: var(--gold-text); }
+
+  @media (min-width: 1100px) {
+    .menu-toggle, .mobile-nav { display: none !important; }
+    .bar { grid-template-columns: auto 1fr auto; }
+    .brand { justify-self: start; }
+    .primary { display: block; justify-self: center; }
+    .primary ul { display: flex; gap: var(--s-5); list-style: none; margin: 0; padding: 0; }
+    .primary a { font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-decoration: none; padding: var(--s-2) 0; border-bottom: 1px solid transparent; transition: border-color 0.25s; }
+    .primary a:hover, .primary a[aria-current='page'] { border-bottom-color: var(--gold); }
+    .header-cta { display: inline-flex; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]')!;
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]')!;
+  const menu = document.querySelector<HTMLElement>('[data-menu]')!;
+  const label = toggle.querySelector('.visually-hidden')!;
+
+  const setOpen = (open: boolean) => {
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    label.textContent = open ? 'Close menu' : 'Open menu';
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  toggle.addEventListener('click', () => setOpen(Boolean(menu.hidden)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { setOpen(false); toggle.focus(); } });
+
+  const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+</script>

@@ -1,0 +1,17 @@
+---
+// Wordmark placeholder. Swap for the final logo file when the brand identity is ready.
+interface Props { light?: boolean }
+const { light = false } = Astro.props;
+---
+<span class:list={['logo', { light }]}>
+  <span class="word">Royalty</span>
+  <span class="sub">Imitation Jewellery</span>
+</span>
+
+<style>
+  .logo { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; color: var(--ink); }
+  .word { font-family: var(--font-serif); font-size: 1.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+  .sub { margin-top: 4px; font-size: 0.5625rem; font-weight: 600; letter-spacing: 0.34em; text-transform: uppercase; color: var(--gold-text); }
+  .light { color: var(--ivory); }
+  .light .sub { color: var(--gold-soft); }
+</style>

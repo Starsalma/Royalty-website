@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+import Icon from '../components/Icon.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import { whatsappLink, messages, telLink, hasPhone, hasWhatsApp } from '../lib/contact';
+
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Contact', href: '/contact/' }];
+const socials = Object.entries(site.social).filter(([, v]) => v);
+---
+<BaseLayout
+  title="Contact Royalty | WhatsApp, Call or Send an Enquiry"
+  description="Contact Royalty imitation jewellery on WhatsApp, by phone or through our enquiry form. Ask about prices, stock, videos, bulk and gifting orders."
+  crumbs={crumbs}
+  schema={[{ '@type': 'ContactPage', name: 'Contact Royalty', url: new URL('/contact/', Astro.site).href }]}
+>
+  <PageIntro eyebrow="Contact" title="Talk to us" intro="The quickest way to reach us is WhatsApp. Send a product code, a screenshot or a photo of your outfit and we will help you choose." />
+
+  <section class="container grid-c">
+    <div class="ways">
+      <a class="way" href={whatsappLink(messages.general())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="contact_page">
+        <Icon name="whatsapp" size={26} />
+        <span><strong>WhatsApp</strong>{hasWhatsApp ? `+${site.whatsappNumber}` : <Todo text="Add WhatsApp number in src/config/site.ts" />}</span>
+      </a>
+      {hasPhone
+        ? <a class="way" href={telLink()} data-track="phone_click" data-location="contact_page"><Icon name="phone" size={26} /><span><strong>Call</strong>{site.phone}</span></a>
+        : <div class="way"><Icon name="phone" size={26} /><span><strong>Call</strong><Todo text="Add phone number" /></span></div>}
+      {site.email
+        ? <a class="way" href={`mailto:${site.email}`} data-track="email_click" data-location="contact_page"><Icon name="mail" size={26} /><span><strong>Email</strong>{site.email}</span></a>
+        : <div class="way"><Icon name="mail" size={26} /><span><strong>Email</strong><Todo text="Add email address" /></span></div>}
+      <div class="details">
+        <p><strong>Hours:</strong> {site.hours || <Todo text="Add response hours, e.g. Mon to Sat, 10am to 8pm" />}</p>
+        <p><strong>Location:</strong> {site.city ? `${site.city}, ${site.country}` : <Todo text="Add city (only if you want it public)" />}</p>
+        {socials.length > 0 && <p><strong>Follow:</strong> {socials.map(([k, v], i) => <>{i > 0 && ' · '}<a href={v} target="_blank" rel="noopener">{k[0].toUpperCase() + k.slice(1)}</a></>)}</p>}
+      </div>
+    </div>
+    <EnquiryForm kind="general" heading="Send an enquiry" intro="Tell us what you are looking for. We will reply on WhatsApp." id="contact-form" />
+  </section>
+</BaseLayout>
+
+<style>
+  .grid-c { display: grid; gap: var(--s-7); padding-bottom: var(--section); }
+  @media (min-width: 960px) { .grid-c { grid-template-columns: 1fr 1.2fr; gap: var(--s-9); align-items: start; } }
+  .ways { display: grid; gap: var(--s-3); }
+  .way { display: flex; gap: var(--s-4); align-items: center; padding: var(--s-5); border: 1px solid var(--line); border-radius: var(--radius-lg); text-decoration: none; background: #fff; transition: border-color 0.2s; }
+  a.way:hover { border-color: var(--ink); }
+  .way :global(svg) { color: var(--gold); flex: none; }
+  .way span { display: flex; flex-direction: column; gap: 2px; }
+  .way strong { font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .details { padding: var(--s-5) 0; font-size: 0.9375rem; }
+  .details p { margin-bottom: var(--s-2); }
+</style>

@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Icon from '../components/Icon.astro';
+import { allCategories } from '../lib/catalog';
+import { categoryUrl } from '../lib/urls';
+
+const categories = await allCategories();
+---
+<BaseLayout title="Search Jewellery | Royalty" description="Search Royalty imitation jewellery by product name, product code, category or style." noindex>
+  <PageIntro title="Search jewellery">
+    <form class="search" role="search" action="/search/" data-search-form>
+      <label for="q" class="visually-hidden">Search by name, product code, category or style</label>
+      <Icon name="search" size={22} />
+      <input id="q" name="q" type="search" placeholder="Try “jhumka”, “kundan” or “RY-ER-101”" autocomplete="off" autofocus />
+    </form>
+  </PageIntro>
+
+  <section class="container results-wrap">
+    <p class="status" aria-live="polite" data-search-status></p>
+    <ul class="results" data-search-results></ul>
+    <div class="none" data-search-empty hidden>
+      <p>We could not find that. Try a simpler word, or browse a category:</p>
+      <ul class="cats">{categories.map((c) => <li><a href={categoryUrl(c.id)}>{c.data.name}</a></li>)}</ul>
+      <p>Or send us a photo of what you are looking for on <a href="/contact/">WhatsApp</a>.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .search { position: relative; max-width: 640px; margin-top: var(--s-5); }
+  .search :global(svg) { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .search input { width: 100%; min-height: 56px; padding: 0 1rem 0 3.2rem; border: 1px solid var(--ink); border-radius: var(--radius); background: #fff; font-size: 1.0625rem; }
+  .results-wrap { padding-bottom: var(--section); min-height: 40vh; }
+  .status { color: var(--muted); font-size: 0.875rem; }
+  .results { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-2); }
+  .results :global(a) { display: grid; grid-template-columns: 64px 1fr; gap: var(--s-4); align-items: center; padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius-lg); text-decoration: none; background: #fff; }
+  .results :global(a:hover) { border-color: var(--ink); }
+  .results :global(img) { width: 64px; height: 80px; object-fit: cover; background: var(--surface); }
+  .results :global(.n) { font-family: var(--font-serif); font-size: 1.25rem; display: block; }
+  .results :global(.m) { font-size: 0.8125rem; color: var(--muted); }
+  .cats { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; padding: 0; }
+  .cats a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s-4); border: 1px solid var(--line); border-radius: 999px; text-decoration: none; }
+  .none a { color: var(--gold-text); }
+</style>
+
+<script>
+  import { track } from '../scripts/analytics';
+
+  type Item = { name: string; sku: string; url: string; image: string; category: string; styles: string; text: string };
+  const input = document.querySelector<HTMLInputElement>('#q')!;
+  const form = document.querySelector<HTMLFormElement>('[data-search-form]')!;
+  const list = document.querySelector<HTMLUListElement>('[data-search-results]')!;
+  const status = document.querySelector<HTMLElement>('[data-search-status]')!;
+  const empty = document.querySelector<HTMLElement>('[data-search-empty]')!;
+  let index: Item[] = [];
+  let timer: number | undefined;
+
+  const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+  function run(q: string, log = false) {
+    const terms = norm(q).split(' ').filter(Boolean);
+    history.replaceState(null, '', q ? `?q=${encodeURIComponent(q)}` : location.pathname);
+    if (!terms.length) { list.innerHTML = ''; status.textContent = ''; empty.hidden = true; return; }
+    const skuQuery = q.trim().toLowerCase().replace(/\s+/g, '');
+    const scored = index
+      .map((it) => {
+        const hay = norm(`${it.name} ${it.sku} ${it.category} ${it.styles} ${it.text}`);
+        if (!terms.every((t) => hay.includes(t))) return null;
+        let score = 0;
+        if (it.sku.toLowerCase() === skuQuery) score += 100;
+        terms.forEach((t) => { if (norm(it.name).includes(t)) score += 3; if (norm(it.category).includes(t)) score += 2; });
+        return { it, score };
+      })
+      .filter((x): x is { it: Item; score: number } => x !== null)
+      .sort((a, b) => b.score - a.score);
+
+    list.innerHTML = scored.map(({ it }) => `<li><a href="${it.url}"><img src="${it.image}" alt="" loading="lazy" width="64" height="80"><span><span class="n">${esc(it.name)}</span><span class="m">${esc(it.category)} · ${esc(it.sku)}</span></span></a></li>`).join('');
+    status.textContent = scored.length ? `${scored.length} result${scored.length === 1 ? '' : 's'} for “${q}”` : '';
+    empty.hidden = scored.length > 0;
+    if (log) track('search', { search_term: q, results: scored.length });
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); run(input.value, true); });
+  input.addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(() => run(input.value), 150); });
+  input.addEventListener('blur', () => { if (input.value) track('search', { search_term: input.value }); });
+
+  fetch('/search-index.json').then((r) => r.json()).then((data: Item[]) => {
+    index = data;
+    const q = new URLSearchParams(location.search).get('q') || '';
+    input.value = q;
+    if (q) run(q, true);
+  });
+</script>

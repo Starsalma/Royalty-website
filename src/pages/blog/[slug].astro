@@ -1,0 +1,142 @@
+---
+import { render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import { brandTitle } from '../../lib/seo';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import FaqList from '../../components/FaqList.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { allPosts, allProducts, allCategories, allCollections } from '../../lib/catalog';
+import { postUrl, categoryUrl, collectionUrl } from '../../lib/urls';
+import { whatsappLink, messages } from '../../lib/contact';
+import { article, faqPage } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const posts = await allPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const d = post.data;
+const { Content, headings } = await render(post);
+const [posts, products, categories, collections] = await Promise.all([allPosts(), allProducts(), allCategories(), allCollections()]);
+const catName = Object.fromEntries(categories.map((c) => [c.id, c.data.name]));
+const catIds = new Set(d.relatedCategories.map((r) => r.id));
+const colIds = new Set(d.relatedCollections.map((r) => r.id));
+// Products from the categories and collections this article is about: blog → product internal links.
+const shopTheStory = products
+  .map((p) => ({ p, score: (catIds.has(p.data.category.id) ? 1 : 0) + p.data.collections.filter((c) => colIds.has(c.id)).length }))
+  .filter((x) => x.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 4)
+  .map((x) => x.p);
+const shopLinks = [
+  ...categories.filter((c) => catIds.has(c.id)).map((c) => ({ label: `Imitation ${c.data.name.toLowerCase()}`, href: categoryUrl(c.id) })),
+  ...collections.filter((c) => colIds.has(c.id)).map((c) => ({ label: c.data.name, href: collectionUrl(c.id) })),
+];
+const more = posts.filter((p) => p.id !== post.id).slice(0, 3);
+const toc = headings.filter((h) => h.depth === 2);
+const url = postUrl(post.id);
+const img = await getImage({ src: d.image, width: 1200 });
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Journal', href: '/blog/' }, { name: d.title, href: url }];
+const fmt = (date: Date) => date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<BaseLayout
+  title={brandTitle(d.seoTitle)}
+  description={d.seoDescription}
+  image={img.src}
+  imageAlt={d.imageAlt}
+  type="article"
+  crumbs={crumbs}
+  schema={[article(post, url, new URL(img.src, Astro.site).href, Astro.site!), faqPage(d.faq)]}
+>
+  <article>
+    <header class="container head">
+      <p class="eyebrow">Journal</p>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.excerpt}</p>
+      <p class="meta">
+        By {d.author} · <time datetime={d.publishedAt.toISOString()}>{fmt(d.publishedAt)}</time>
+        {d.updatedAt && <> · Updated <time datetime={d.updatedAt.toISOString()}>{fmt(d.updatedAt)}</time></>}
+      </p>
+    </header>
+    <div class="container hero">
+      <Image src={d.image} alt={d.imageAlt} widths={[640, 1000, 1400]} sizes="(min-width: 1100px) 1100px, 100vw" loading="eager" fetchpriority="high" />
+    </div>
+
+    <div class="container body">
+      <aside class="side">
+        {toc.length > 2 && (
+          <nav class="toc" aria-label="In this article">
+            <h2>In this article</h2>
+            <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+          </nav>
+        )}
+        <div class="side-cta">
+          <p>Have a question about a piece?</p>
+          <a class="btn btn--whatsapp btn--sm btn--block" href={whatsappLink(messages.general())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="blog_sidebar"><Icon name="whatsapp" /> Ask on WhatsApp</a>
+        </div>
+      </aside>
+      <div class="prose content">
+        <Content />
+        {d.faq.length > 0 && <div class="faq-block"><FaqList items={d.faq} /></div>}
+        {shopLinks.length > 0 && (
+          <div class="shop-links">
+            <h2>Shop this guide</h2>
+            <ul>{shopLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+          </div>
+        )}
+      </div>
+    </div>
+  </article>
+
+  {shopTheStory.length > 0 && (
+    <section class="section section--surface">
+      <div class="container">
+        <div class="section-head"><div><span class="eyebrow">Shop the story</span><h2>Designs from this guide</h2></div></div>
+        <div class="grid grid--products">
+          {shopTheStory.map((p) => <ProductCard product={p} categoryName={catName[p.data.category.id]} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {more.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><div><span class="eyebrow">Keep reading</span><h2>More from the journal</h2></div></div>
+        <div class="grid grid--3">{more.map((p) => <PostCard post={p} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand location="blog_post_band" />
+</BaseLayout>
+
+<style>
+  .head { max-width: 900px; padding-top: var(--s-6); text-align: center; }
+  .head h1 { font-size: clamp(2.2rem, 1.6rem + 2.6vw, 3.6rem); }
+  .head .lede { margin-inline: auto; }
+  .meta { font-size: 0.8125rem; color: var(--muted); }
+  .hero { max-width: 1180px; margin-block: var(--s-6); }
+  .hero :global(img) { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius); }
+  .body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-7); padding-bottom: var(--section); }
+  @media (min-width: 1000px) { .body { grid-template-columns: 240px minmax(0, 1fr); gap: var(--s-9); max-width: 1180px; } .side { order: 0; } }
+  .side { display: grid; gap: var(--s-6); align-content: start; }
+  @media (min-width: 1000px) { .side { position: sticky; top: calc(var(--header-h) + 60px); align-self: start; } }
+  .toc h2 { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-text); margin-bottom: var(--s-3); }
+  .toc ol { padding-left: 1.1em; margin: 0; font-size: 0.875rem; }
+  .toc li { margin-bottom: var(--s-2); }
+  .toc a { text-decoration: none; color: var(--ink-soft); }
+  .toc a:hover { text-decoration: underline; }
+  .side-cta { padding: var(--s-5); background: var(--surface); border-radius: var(--radius-lg); font-size: 0.9375rem; }
+  @media (max-width: 999px) { .side-cta { display: none; } }
+  .content { margin: 0; }
+  .content :global(h2:first-child) { margin-top: 0; }
+  .faq-block { margin-top: var(--s-8); }
+  .shop-links { margin-top: var(--s-7); padding: var(--s-5); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .shop-links h2 { margin-top: 0; font-size: 1.5rem; }
+  .shop-links ul { margin: 0; }
+</style>

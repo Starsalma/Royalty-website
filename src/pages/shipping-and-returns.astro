@@ -1,0 +1,28 @@
+---
+import PolicyLayout from '../layouts/PolicyLayout.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+
+const f = site.serviceFacts;
+---
+<PolicyLayout title="Shipping & Returns" seoTitle="Shipping & Returns Policy | Royalty" description="Delivery areas, dispatch times, shipping charges, returns and exchanges for Royalty imitation jewellery orders." path="/shipping-and-returns/" updated="23 September 2026">
+  <h2>Where we deliver</h2>
+  <p>
+    {f.shipsPanIndia === true ? 'We deliver across India.' : <Todo text="Confirm delivery areas (all India? specific cities?)" />}
+    {' '}
+    {f.shipsInternational === true ? 'International shipping is available on request.' : f.shipsInternational === false ? 'We currently do not ship outside India.' : <Todo text="Confirm whether you ship internationally" />}
+  </p>
+
+  <h2>Dispatch time</h2>
+  <p>{f.dispatchTime ? `Orders are usually dispatched in ${f.dispatchTime}.` : <Todo text="Add usual dispatch time" />} We share tracking details on WhatsApp once your order ships.</p>
+
+  <h2>Shipping charges</h2>
+  <p><Todo text="Add shipping charges or free-shipping threshold" /></p>
+
+  <h2>Cash on delivery</h2>
+  <p>{f.cashOnDelivery === true ? 'Cash on delivery is available on eligible pin codes.' : f.cashOnDelivery === false ? 'We accept prepaid orders only.' : <Todo text="Confirm whether COD is offered" />}</p>
+
+  <h2>Returns and exchanges</h2>
+  <p>{f.returnPolicySummary || <Todo text="Add return / exchange window and conditions" />}</p>
+  <p>If your order arrives damaged, please record an unboxing video and message us on WhatsApp within 48 hours of delivery so we can help. <Todo text="Confirm this damage-claim process or edit it" /></p>
+</PolicyLayout>

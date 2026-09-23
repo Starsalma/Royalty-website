@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import ValueProps from '../components/ValueProps.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'About', href: '/about/' }];
+---
+<BaseLayout
+  title="About Royalty | Imitation Jewellery Chosen Piece by Piece"
+  description="Royalty is an imitation jewellery brand for weddings, festivals and everyday wear. Learn how we choose our designs and how we help you buy with confidence."
+  crumbs={crumbs}
+>
+  <PageIntro eyebrow="About Royalty" title="Jewellery that makes the moment feel special" intro="Royalty brings together imitation jewellery for the days you want to remember, from your own wedding to a friend's sangeet or a Friday evening out." />
+
+  <section class="section section--surface">
+    <div class="container two">
+      <div class="prose">
+        <h2>Our story</h2>
+        <p><Todo text="Add the founding story: who started Royalty, in which city and year, and why. A short, honest story builds more trust than anything else on this page." /></p>
+        <h2>How we choose our designs</h2>
+        <p>We look for pieces that look beautiful up close, not only in photos. That means an even finish, stones that sit neatly and designs that suit real occasions: weddings, festivals, parties and everyday wear.</p>
+        <p><Todo text="Describe where designs come from, e.g. in-house design, partner workshops or sourcing markets. Only include what is true." /></p>
+      </div>
+      <div class="prose">
+        <h2>How we sell</h2>
+        <p>We keep buying personal. Instead of a long checkout, you talk to us on WhatsApp. Ask for the price, a video in daylight or suggestions for your outfit, and we reply with honest answers.</p>
+        <h2>What we will never do</h2>
+        <ul>
+          <li>Show fake discounts or countdown timers</li>
+          <li>Post fake reviews or made-up customer numbers</li>
+          <li>Hide what a piece is made of when you ask</li>
+        </ul>
+        {site.city && <p>We are based in {site.city}, {site.country}.</p>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><div><span class="eyebrow">Why people shop with us</span><h2>Simple, personal, honest</h2></div></div>
+      <ValueProps />
+    </div>
+  </section>
+
+  <CtaBand location="about_band" />
+</BaseLayout>
+
+<style>
+  .two { display: grid; gap: var(--s-7); }
+  @media (min-width: 960px) { .two { grid-template-columns: 1fr 1fr; gap: var(--s-9); } }
+  .two .prose h2:first-child { margin-top: 0; }
+</style>

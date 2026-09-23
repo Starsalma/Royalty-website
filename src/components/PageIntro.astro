@@ -1,0 +1,17 @@
+---
+interface Props { eyebrow?: string; title: string; intro?: string; center?: boolean }
+const { eyebrow, title, intro, center = false } = Astro.props;
+---
+<header class:list={['container', 'page-intro', { center }]}>
+  {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+  <h1>{title}</h1>
+  {intro && <p class="lede">{intro}</p>}
+  <slot />
+</header>
+
+<style>
+  .page-intro { padding-top: var(--s-6); padding-bottom: var(--s-7); }
+  h1 { max-width: 20ch; }
+  .center { text-align: center; }
+  .center h1, .center .lede { margin-inline: auto; }
+</style>

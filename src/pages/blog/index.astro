@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import PostCard from '../../components/PostCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { allPosts } from '../../lib/catalog';
+import { postUrl } from '../../lib/urls';
+import { itemList } from '../../lib/schema';
+
+const posts = await allPosts();
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Journal', href: '/blog/' }];
+---
+<BaseLayout
+  title="Jewellery Journal: Style Guides, Care Tips & Bridal Advice | Royalty"
+  description="Guides from Royalty on choosing, styling and caring for imitation jewellery: bridal planning, jhumka styles, kundan vs AD, and simple care habits."
+  crumbs={crumbs}
+  schema={[itemList('Royalty Journal', posts.map((p) => postUrl(p.id)), Astro.site!)]}
+>
+  <PageIntro eyebrow="The journal" title="Guides to choosing and wearing jewellery" intro="Practical advice for picking the right piece, styling it for the occasion and keeping it looking new." />
+  <section class="container list">
+    <div class="grid grid--3">
+      {posts.map((p) => <PostCard post={p} headingLevel="h2" />)}
+    </div>
+  </section>
+  <CtaBand location="blog_index_band" />
+</BaseLayout>
+
+<style>
+  .list { padding-bottom: var(--section); }
+</style>

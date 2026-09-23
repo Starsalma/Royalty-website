@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+import FaqList from '../components/FaqList.astro';
+import Icon from '../components/Icon.astro';
+import { whatsappLink, messages } from '../lib/contact';
+import { faqPage } from '../lib/schema';
+
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Bulk & Gifting Orders', href: '/bulk-and-gifting-orders/' }];
+const uses = [
+  { icon: 'gem', title: 'Bridesmaids', text: 'Matching necklace sets, earrings or tikkas so the whole bridal party looks coordinated in photos.' },
+  { icon: 'gift', title: 'Return gifts', text: 'Earrings, rings or bangles as wedding, baby shower or festive return gifts for guests.' },
+  { icon: 'layers', title: 'Corporate gifting', text: 'Jewellery gifts for Diwali, Women’s Day or client appreciation, chosen to fit your budget per piece.' },
+  { icon: 'sparkle', title: 'Events & performances', text: 'Identical sets for dance groups, stage performances and themed events.' },
+] as const;
+const faq = [
+  { q: 'How many pieces count as a bulk order?', a: 'Any time you need several pieces of the same design, use this page. Tell us the exact quantity and we will confirm what is available.' },
+  { q: 'Can you suggest designs within my budget?', a: 'Yes. Share your budget per piece, the occasion and the number of pieces, and we will send suitable options on WhatsApp.' },
+  { q: 'Can I see the design before confirming a bulk order?', a: 'Yes. We will share photos and a video of the exact design before you confirm.' },
+];
+---
+<BaseLayout
+  title="Bulk & Gifting Orders | Bridesmaid Sets, Return Gifts | Royalty"
+  description="Order imitation jewellery in quantity from Royalty: matching bridesmaid sets, wedding return gifts, corporate gifting and event jewellery. Send your requirement."
+  crumbs={crumbs}
+  whatsappMessage={messages.bulk()}
+  schema={[faqPage(faq)]}
+>
+  <PageIntro eyebrow="Bulk & gifting" title="Jewellery in quantity, for your occasion" intro="Need matching pieces for bridesmaids, return gifts for guests or gifts for your team? Tell us the occasion, the number of pieces and your budget. We will suggest designs and confirm availability.">
+    <div class="btn-row cta">
+      <a class="btn" href="#bulk-form">Send your requirement</a>
+      <a class="btn btn--whatsapp" href={whatsappLink(messages.bulk())} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="bulk_intro"><Icon name="whatsapp" /> Discuss on WhatsApp</a>
+    </div>
+  </PageIntro>
+
+  <section class="section section--surface">
+    <div class="container">
+      <ul class="uses">
+        {uses.map((u) => (
+          <li data-reveal><Icon name={u.icon} size={26} /><h2>{u.title}</h2><p>{u.text}</p></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid-c">
+      <div>
+        <span class="eyebrow">How it works</span>
+        <h2>From requirement to delivery</h2>
+        <ol class="steps">
+          <li><strong>Share your requirement.</strong> Occasion, quantity, budget per piece and the date you need it by.</li>
+          <li><strong>Get options.</strong> We send suitable designs with photos and videos.</li>
+          <li><strong>Confirm.</strong> We confirm availability for the full quantity, the price and delivery.</li>
+        </ol>
+        <FaqList items={faq} heading="Bulk order questions" headingLevel="h3" />
+      </div>
+      <EnquiryForm kind="bulk" heading="Send your requirement" intro="The more detail you share, the better our suggestions." id="bulk-form" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cta { margin-top: var(--s-5); }
+  .uses { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-6); }
+  @media (min-width: 720px) { .uses { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .uses { grid-template-columns: repeat(4, 1fr); } }
+  .uses li { border-top: 1px solid var(--gold); padding-top: var(--s-5); }
+  .uses :global(svg) { color: var(--gold); margin-bottom: var(--s-4); }
+  .uses h2 { font-size: 1.5rem; margin-bottom: var(--s-2); }
+  .uses p { color: var(--muted); margin: 0; }
+  .grid-c { display: grid; gap: var(--s-7); }
+  @media (min-width: 960px) { .grid-c { grid-template-columns: 1fr 1.1fr; gap: var(--s-9); align-items: start; } }
+  .steps { padding-left: 1.2em; margin: var(--s-5) 0 var(--s-7); display: grid; gap: var(--s-3); color: var(--ink-soft); }
+  .steps li::marker { color: var(--gold-text); font-weight: 600; }
+  .grid-c :global(.faq-h) { font-size: 1.4rem; margin-bottom: var(--s-3); }
+</style>

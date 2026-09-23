@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import ProductListing from '../../components/ProductListing.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { allProducts, allCategories, allCollections, facetsFor } from '../../lib/catalog';
+import { categoryUrl, collectionUrl, productUrl, shopUrl } from '../../lib/urls';
+import { itemList } from '../../lib/schema';
+
+const [products, categories, collections] = await Promise.all([allProducts(), allCategories(), allCollections()]);
+const catName = Object.fromEntries(categories.map((c) => [c.id, c.data.name]));
+const facets = facetsFor(products, categories, collections, ['type', 'style', 'occasion', 'colour']);
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Imitation Jewellery', href: shopUrl }];
+---
+<BaseLayout
+  title="Buy Imitation Jewellery Online | Earrings, Sets, Bangles | Royalty"
+  description="Browse Royalty imitation jewellery: earrings, necklace sets, chokers, bangles, rings and maang tikka in kundan, AD, temple and oxidised styles."
+  crumbs={crumbs}
+  schema={[itemList('Imitation Jewellery', products.map(productUrl), Astro.site!)]}
+>
+  <PageIntro eyebrow="The collection" title="Imitation Jewellery" intro="Every design in one place. Filter by type, style, occasion or colour, then ask on WhatsApp for price, stock and a video of any piece.">
+    <nav class="quick" aria-label="Categories">
+      {categories.map((c) => <a href={categoryUrl(c.id)}>{c.data.name}</a>)}
+    </nav>
+  </PageIntro>
+
+  <section class="container listing-wrap">
+    <h2 class="visually-hidden">All designs</h2>
+    <ProductListing products={products} categoryNames={catName} facets={facets} />
+  </section>
+
+  <section class="section section--surface">
+    <div class="container prose">
+      <h2>Imitation jewellery, organised the way you shop</h2>
+      <p>Most people start with an occasion in mind: a wedding, a festival, an office party. Others start with a style they already love. We have organised the collection both ways, so you can go straight to <a href={collectionUrl('bridal-jewellery')}>bridal jewellery</a>, <a href={collectionUrl('partywear-jewellery')}>partywear</a> or <a href={collectionUrl('daily-wear-jewellery')}>daily wear</a>, or browse by style, such as <a href={collectionUrl('kundan-jewellery')}>kundan</a>, <a href={collectionUrl('american-diamond-jewellery')}>American diamond</a>, <a href={collectionUrl('temple-jewellery')}>temple</a> and <a href={collectionUrl('oxidised-jewellery')}>oxidised</a>.</p>
+      <p>Not sure what imitation jewellery is made of or how long it lasts? Our guide <a href="/blog/what-is-imitation-jewellery/">What is imitation jewellery</a> explains the basics, and <a href="/blog/how-to-care-for-imitation-jewellery/">how to care for imitation jewellery</a> covers keeping it looking new.</p>
+    </div>
+  </section>
+
+  <CtaBand location="shop_band" />
+</BaseLayout>
+
+<style>
+  .quick { display: flex; gap: var(--s-2); overflow-x: auto; margin-top: var(--s-5); padding-bottom: 4px; scrollbar-width: none; }
+  .quick a { flex: none; display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s-4); border: 1px solid var(--line); border-radius: 999px; font-size: 0.8125rem; text-decoration: none; }
+  .quick a:hover { border-color: var(--ink); }
+  .listing-wrap { padding-bottom: var(--section); }
+</style>

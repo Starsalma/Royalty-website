@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import TileCard from '../../components/TileCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { allCollections, allProducts, inCollection } from '../../lib/catalog';
+import { collectionUrl } from '../../lib/urls';
+import { itemList } from '../../lib/schema';
+
+const [collections, products] = await Promise.all([allCollections(), allProducts()]);
+const groups = [
+  { id: 'occasion', title: 'Shop by occasion', text: 'Start with where you are going.' },
+  { id: 'style', title: 'Shop by style', text: 'Start with the look you love.' },
+] as const;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Collections', href: '/collections/' }];
+---
+<BaseLayout
+  title="Imitation Jewellery Collections by Style & Occasion | Royalty"
+  description="Explore Royalty collections: bridal, partywear, festive and daily wear jewellery, plus kundan, American diamond, temple, oxidised and antique gold styles."
+  crumbs={crumbs}
+  schema={[itemList('Collections', collections.map((c) => collectionUrl(c.id)), Astro.site!)]}
+>
+  <PageIntro eyebrow="Collections" title="Jewellery collections" intro="Browse by the occasion you are dressing for, or by the style you love." />
+
+  {groups.map((g, i) => (
+    <section class:list={['section', { 'section--surface': i % 2 === 1 }]}>
+      <div class="container">
+        <div class="section-head"><div><h2>{g.title}</h2><p class="lede">{g.text}</p></div></div>
+        <div class="grid grid--3">
+          {collections.filter((c) => c.data.group === g.id).map((c) => (
+            <TileCard href={collectionUrl(c.id)} title={c.data.name} image={c.data.image} alt={c.data.imageAlt} count={inCollection(products, c.id).length} />
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <CtaBand location="collections_band" />
+</BaseLayout>

@@ -1,0 +1,53 @@
+---
+// Shared lower half of category and collection pages: SEO copy, related links,
+// guides, FAQ. Keeps internal linking consistent across all landing pages.
+import type { CollectionEntry } from 'astro:content';
+import PostCard from './PostCard.astro';
+import FaqList from './FaqList.astro';
+
+interface Props {
+  related: { label: string; href: string }[];
+  relatedHeading: string;
+  posts: CollectionEntry<'blog'>[];
+  faq: { q: string; a: string }[];
+  name: string;
+}
+const { related, relatedHeading, posts, faq, name } = Astro.props;
+---
+<section class="section section--surface">
+  <div class="container copy">
+    <div class="prose"><slot /></div>
+    {related.length > 0 && (
+      <aside class="related" aria-label={relatedHeading}>
+        <h2 class="rh">{relatedHeading}</h2>
+        <ul>{related.map((r) => <li><a href={r.href}>{r.label}</a></li>)}</ul>
+      </aside>
+    )}
+  </div>
+</section>
+
+{posts.length > 0 && (
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><div><span class="eyebrow">Guides</span><h2>Read before you choose</h2></div></div>
+      <div class="grid grid--3">{posts.slice(0, 3).map((p) => <PostCard post={p} />)}</div>
+    </div>
+  </section>
+)}
+
+{faq.length > 0 && (
+  <section class:list={['section', { 'section--surface': posts.length > 0 }]}>
+    <div class="container"><FaqList items={faq} heading={`${name}: common questions`} /></div>
+  </section>
+)}
+
+<style>
+  .copy { display: grid; gap: var(--s-7); }
+  @media (min-width: 1000px) { .copy { grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s-9); } }
+  .rh { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-text); margin-bottom: var(--s-4); }
+  .related ul { list-style: none; padding: 0; margin: 0; }
+  .related li { border-top: 1px solid var(--line); }
+  .related a { display: block; padding: var(--s-3) 0; text-decoration: none; font-family: var(--font-serif); font-size: 1.25rem; }
+  .related a:hover { color: var(--gold-text); }
+  @media (min-width: 1000px) { .related { position: sticky; top: calc(var(--header-h) + 60px); align-self: start; } }
+</style>

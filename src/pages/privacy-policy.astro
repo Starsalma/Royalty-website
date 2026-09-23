@@ -1,0 +1,38 @@
+---
+import PolicyLayout from '../layouts/PolicyLayout.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+---
+<PolicyLayout title="Privacy Policy" seoTitle="Privacy Policy | Royalty" description="How Royalty collects, uses and protects the information you share through our website, enquiry forms and WhatsApp." path="/privacy-policy/" updated="23 September 2026">
+  <p>This policy explains what information {site.legalName || site.name} ("we", "us") collects when you use this website or contact us, and how we use it.</p>
+
+  <h2>Information we collect</h2>
+  <ul>
+    <li><strong>Enquiry details you give us:</strong> your name, WhatsApp number, city, the product you ask about, quantity and your message.</li>
+    <li><strong>Messages on WhatsApp, phone or email:</strong> the content of your conversation with us.</li>
+    <li><strong>Usage data:</strong> if analytics is enabled, anonymous information such as pages viewed, device type and approximate location, collected through Google Analytics.</li>
+  </ul>
+
+  <h2>How we use it</h2>
+  <ul>
+    <li>To reply to your enquiry and share prices, availability, photos and videos</li>
+    <li>To process and deliver your order</li>
+    <li>To understand which pages and products are useful, so we can improve the website</li>
+  </ul>
+  <p>We do not sell your personal information. We do not add you to marketing lists without your consent.</p>
+
+  <h2>WhatsApp</h2>
+  <p>When you contact us on WhatsApp, your messages are also handled under WhatsApp's own privacy policy.</p>
+
+  <h2>Cookies and analytics</h2>
+  <p>This website may use cookies set by Google Analytics or Google Tag Manager to measure visits and which buttons are used. <Todo text="Confirm which analytics tools are active and whether a cookie consent banner is needed" /></p>
+
+  <h2>How long we keep information</h2>
+  <p><Todo text="State how long enquiry and order data is kept" /></p>
+
+  <h2>Your choices</h2>
+  <p>You can ask us to show, correct or delete the personal information we hold about you by contacting us.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy: {site.email || <Todo text="Add contact email" />}</p>
+</PolicyLayout>

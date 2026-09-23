@@ -1,0 +1,178 @@
+---
+/**
+ * Product grid with client-side filters and sorting.
+ * SEO note: every filter combination is the same static page. State lives in the
+ * query string only for sharing, and the page canonical always points at the
+ * clean URL, so filters never create duplicate indexable URLs.
+ */
+import type { Product } from '../lib/catalog';
+import ProductCard from './ProductCard.astro';
+import Icon from './Icon.astro';
+
+type Option = { id: string; label: string };
+interface Props {
+  products: Product[];
+  categoryNames: Record<string, string>;
+  facets: { key: 'type' | 'style' | 'occasion' | 'colour'; label: string; options: Option[] }[];
+  emptyMessage?: string;
+}
+const { products, categoryNames, facets, emptyMessage = 'No designs match these filters yet.' } = Astro.props;
+const visibleFacets = facets.filter((f) => f.options.length > 1);
+---
+<div class="listing" data-listing>
+  <div class="toolbar">
+    <p class="count" aria-live="polite"><span data-count>{products.length}</span> designs</p>
+    <div class="tools">
+      {visibleFacets.length > 0 && (
+        <button class="btn btn--outline btn--sm filter-toggle" type="button" aria-expanded="false" aria-controls="filter-panel" data-filter-toggle>
+          <Icon name="filter" /> Filter
+        </button>
+      )}
+      <label class="sort">
+        <span class="visually-hidden">Sort by</span>
+        <select data-sort>
+          <option value="featured">Sort: Featured</option>
+          <option value="new">Sort: Newest</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  {visibleFacets.length > 0 && (
+    <div class="panel" id="filter-panel" data-filter-panel>
+      {visibleFacets.map((f) => (
+        <fieldset>
+          <legend>{f.label}</legend>
+          <div class="chips">
+            {f.options.map((o) => (
+              <label class="chip">
+                <input type="checkbox" name={f.key} value={o.id} data-facet={f.key} />
+                <span>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+      <button class="clear" type="button" data-clear hidden>Clear all filters</button>
+    </div>
+  )}
+
+  <div class="grid grid--products" data-grid>
+    {products.map((p, i) => <ProductCard product={p} categoryName={categoryNames[p.data.category.id]} eager={i < 2} />)}
+  </div>
+  <div class="empty" data-empty hidden>
+    <p>{emptyMessage}</p>
+    <p>Tell us what you are looking for and we will check new arrivals for you.</p>
+    <div class="btn-row">
+      <button class="btn btn--outline btn--sm" type="button" data-clear>Clear filters</button>
+      <a class="btn btn--sm" href="/contact/">Tell us what you need</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); padding: var(--s-3) 0; border-block: 1px solid var(--line); margin-bottom: var(--s-5); }
+  .count { margin: 0; font-size: 0.875rem; color: var(--muted); }
+  .tools { display: flex; gap: var(--s-2); align-items: center; }
+  select { min-height: 40px; padding: 0 2rem 0 0.75rem; border: 1px solid var(--line); background: var(--ivory); border-radius: var(--radius); font-size: 0.8125rem; cursor: pointer; }
+  .panel { display: none; gap: var(--s-5); padding-bottom: var(--s-6); }
+  .panel.open { display: grid; }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--s-3); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .chip span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s-4); border: 1px solid var(--line); border-radius: 999px; font-size: 0.8125rem; background: var(--ivory); transition: all 0.2s; }
+  .chip input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
+  .chip input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .clear { justify-self: start; background: none; border: 0; padding: 0; text-decoration: underline; font-size: 0.8125rem; cursor: pointer; color: var(--muted); }
+  .empty { text-align: center; padding: var(--s-8) 0; color: var(--muted); }
+  .empty .btn-row { justify-content: center; margin-top: var(--s-5); }
+  @media (min-width: 900px) {
+    .filter-toggle { display: none; }
+    .panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, auto)); justify-content: start; column-gap: var(--s-7); }
+  }
+</style>
+
+<script>
+  import { track } from '../scripts/analytics';
+
+  document.querySelectorAll<HTMLElement>('[data-listing]').forEach((root) => {
+    const grid = root.querySelector<HTMLElement>('[data-grid]')!;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(':scope > [data-card]'));
+    const inputs = Array.from(root.querySelectorAll<HTMLInputElement>('input[data-facet]'));
+    const sort = root.querySelector<HTMLSelectElement>('[data-sort]')!;
+    const countEl = root.querySelector('[data-count]')!;
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+    const clearBtns = root.querySelectorAll<HTMLButtonElement>('[data-clear]');
+    const panel = root.querySelector<HTMLElement>('[data-filter-panel]');
+    const toggle = root.querySelector<HTMLButtonElement>('[data-filter-toggle]');
+
+    // Hide price sorting until at least one product has a published price.
+    if (!cards.some((c) => c.dataset.price)) sort.querySelectorAll('option[value^="price"]').forEach((o) => o.remove());
+
+    toggle?.addEventListener('click', () => {
+      const open = !panel!.classList.contains('open');
+      panel!.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+
+    const matches = (card: HTMLElement, key: string, values: string[]) => {
+      if (!values.length) return true;
+      if (key === 'type') return values.includes(card.dataset.category!);
+      if (key === 'colour') return values.some((v) => card.dataset.colours!.split('|').includes(v));
+      return values.some((v) => card.dataset.collections!.split(' ').includes(v));
+    };
+
+    function apply(fromUser = false) {
+      const selected: Record<string, string[]> = {};
+      inputs.filter((i) => i.checked).forEach((i) => (selected[i.dataset.facet!] ||= []).push(i.value));
+
+      let shown = 0;
+      cards.forEach((card) => {
+        const ok = Object.entries(selected).every(([k, v]) => matches(card, k, v));
+        card.hidden = !ok;
+        if (ok) shown++;
+      });
+
+      const key = sort.value;
+      const sorted = [...cards].sort((a, b) => {
+        if (key === 'new') return Number(b.dataset.date) - Number(a.dataset.date);
+        if (key.startsWith('price')) {
+          // Unpriced ("price on request") items always go last.
+          const pa = a.dataset.price ? Number(a.dataset.price) : null;
+          const pb = b.dataset.price ? Number(b.dataset.price) : null;
+          if (pa === null || pb === null) return (pa === null ? 1 : 0) - (pb === null ? 1 : 0);
+          return key === 'price-asc' ? pa - pb : pb - pa;
+        }
+        return cards.indexOf(a) - cards.indexOf(b);
+      });
+      sorted.forEach((c) => grid.appendChild(c));
+
+      countEl.textContent = String(shown);
+      empty.hidden = shown > 0;
+      const any = Object.keys(selected).length > 0;
+      clearBtns.forEach((b) => { if (!b.closest('[data-empty]')) b.hidden = !any; });
+
+      const params = new URLSearchParams();
+      Object.entries(selected).forEach(([k, v]) => params.set(k, v.join(',')));
+      if (key !== 'featured') params.set('sort', key);
+      const qs = params.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+      if (fromUser) track('filter_apply', { filters: qs || 'none', results: shown });
+    }
+
+    // Restore state from a shared URL.
+    const params = new URLSearchParams(location.search);
+    inputs.forEach((i) => { i.checked = (params.get(i.dataset.facet!) || '').split(',').includes(i.value); });
+    const s = params.get('sort');
+    if (s && sort.querySelector(`option[value="${CSS.escape(s)}"]`)) sort.value = s;
+
+    inputs.forEach((i) => i.addEventListener('change', () => apply(true)));
+    sort.addEventListener('change', () => apply(true));
+    clearBtns.forEach((b) => b.addEventListener('click', () => { inputs.forEach((i) => (i.checked = false)); apply(true); }));
+    apply();
+  });
+</script>

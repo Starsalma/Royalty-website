@@ -1,0 +1,28 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { postUrl } from '../lib/urls';
+
+interface Props { post: CollectionEntry<'blog'>; headingLevel?: 'h2' | 'h3' }
+const { post, headingLevel: H = 'h3' } = Astro.props;
+const clusterLabel = { basics: 'Jewellery basics', 'style-guide': 'Style guide', occasion: 'Occasion edit', 'buying-guide': 'Buying guide' }[post.data.cluster];
+---
+<article class="post" data-reveal>
+  <a href={postUrl(post.id)} class="media" tabindex="-1" aria-hidden="true">
+    <Image src={post.data.image} alt="" widths={[400, 700]} sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw" loading="lazy" />
+  </a>
+  <p class="meta">{clusterLabel} · <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</time></p>
+  <H class="t"><a href={postUrl(post.id)}>{post.data.title}</a></H>
+  <p class="x">{post.data.excerpt}</p>
+</article>
+
+<style>
+  .media { display: block; aspect-ratio: 16 / 11; overflow: hidden; border-radius: var(--radius); background: var(--surface); margin-bottom: var(--s-4); }
+  .media :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease); }
+  .post:hover .media :global(img) { transform: scale(1.04); }
+  .meta { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--s-2); }
+  .t { font-size: clamp(1.3rem, 1.15rem + 0.5vw, 1.6rem); }
+  .t a { text-decoration: none; }
+  .t a:hover { text-decoration: underline; text-decoration-color: var(--gold); }
+  .x { color: var(--muted); font-size: 0.9375rem; }
+</style>

@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+import { whatsappLink, messages } from '../lib/contact';
+import cover from '../assets/placeholders/necklace-set-ivory.svg';
+
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Catalogue', href: '/catalogue/' }];
+const hasPdf = site.cataloguePdf.length > 0;
+---
+<BaseLayout
+  title="Request the Royalty Catalogue | Latest Imitation Jewellery Designs"
+  description="Get the latest Royalty imitation jewellery catalogue on WhatsApp: new earrings, necklace sets, bridal and festive designs with product codes."
+  crumbs={crumbs}
+  whatsappMessage={messages.catalogue()}
+>
+  <PageIntro eyebrow="Catalogue" title="Get our latest designs" intro="New designs arrive regularly, so we send the catalogue fresh each time. Tell us what you are interested in and we will share the latest pieces with product codes." />
+
+  <section class="container grid-c">
+    <div>
+      <div class="cover"><Image src={cover} alt="Necklace set with matching earrings" width={640} loading="lazy" /></div>
+      <ul class="points">
+        <li><Icon name="check" size={18} /> Latest designs with product codes</li>
+        <li><Icon name="check" size={18} /> Filtered to what you ask for, e.g. bridal sets or earrings</li>
+        <li><Icon name="check" size={18} /> Ask about any piece on the same chat</li>
+      </ul>
+      <div class="btn-row">
+        {hasPdf && <a class="btn" href={site.cataloguePdf} download data-track="catalogue_download" data-location="catalogue_page"><Icon name="book" /> Download catalogue (PDF)</a>}
+        <a class="btn btn--whatsapp" href={whatsappLink(messages.catalogue())} target="_blank" rel="noopener" data-track="catalogue_request" data-location="catalogue_whatsapp"><Icon name="whatsapp" /> Get it on WhatsApp</a>
+      </div>
+    </div>
+    <EnquiryForm kind="catalogue" heading="Request the catalogue" intro="Tell us what you would like to see and we will send it on WhatsApp." id="catalogue-form" />
+  </section>
+</BaseLayout>
+
+<style>
+  .grid-c { display: grid; gap: var(--s-7); padding-bottom: var(--section); }
+  @media (min-width: 960px) { .grid-c { grid-template-columns: 1fr 1.1fr; gap: var(--s-9); align-items: start; } }
+  .cover { max-width: 420px; aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: var(--s-6); }
+  .cover :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .points { list-style: none; padding: 0; margin: 0 0 var(--s-6); display: grid; gap: var(--s-3); }
+  .points li { display: flex; gap: var(--s-3); align-items: center; }
+  .points :global(svg) { color: var(--gold); flex: none; }
+</style>

@@ -1,0 +1,240 @@
+---
+import { render, getEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import { brandTitle } from '../../../lib/seo';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import EnquiryForm from '../../../components/EnquiryForm.astro';
+import FaqList from '../../../components/FaqList.astro';
+import Icon from '../../../components/Icon.astro';
+import { allProducts, allCategories, allCollections, related, formatPrice } from '../../../lib/catalog';
+import { categoryUrl, collectionUrl, productUrl, shopUrl } from '../../../lib/urls';
+import { whatsappLink, messages } from '../../../lib/contact';
+import { product as productSchema, faqPage } from '../../../lib/schema';
+import { site } from '../../../config/site';
+
+export async function getStaticPaths() {
+  const products = await allProducts();
+  return products.map((p) => ({ params: { category: p.data.category.id, product: p.id }, props: { product: p } }));
+}
+
+const { product } = Astro.props;
+const d = product.data;
+const category = (await getEntry(d.category))!;
+const [products, categories, collections] = await Promise.all([allProducts(), allCategories(), allCollections()]);
+const catName = Object.fromEntries(categories.map((c) => [c.id, c.data.name]));
+const myCollections = collections.filter((c) => d.collections.some((r) => r.id === c.id));
+const relatedItems = related(products, product, 4);
+const { Content } = await render(product);
+const url = productUrl(product);
+const waMessage = messages.product(d.name, d.sku);
+const productLabel = `${d.name} (Code: ${d.sku})`;
+
+const optimised = await Promise.all(d.images.map((i) => getImage({ src: i.src, width: 1200 })));
+const imageUrls = optimised.map((o) => new URL(o.src, Astro.site).href);
+
+const availabilityLabel = { in_stock: 'In stock', made_to_order: 'Made to order', out_of_stock: 'Currently out of stock' };
+const specs = [
+  ['Product code', d.sku],
+  ['Category', category.data.name],
+  ['Style', myCollections.filter((c) => c.data.group === 'style').map((c) => c.data.name.replace(/ Jewellery$/, '')).join(', ')],
+  ['Colours', d.colours.join(', ')],
+  ['Finish', d.finish],
+  ['Material', d.material],
+  ['Size', d.size],
+  ['Weight', d.weight],
+  ['Availability', d.availability ? availabilityLabel[d.availability] : undefined],
+].filter(([, v]) => v) as [string, string][];
+
+const productFaq = [
+  { q: `How do I get the price of the ${d.name}?`, a: `Tap "Ask on WhatsApp". The message includes the product code ${d.sku}, so we can reply with the price and current stock straight away.` },
+  { q: 'Can I see this piece on video?', a: 'Yes. Ask on WhatsApp and we will send a short video in natural light so you can see the true colour and finish.' },
+  { q: 'Can I order more than one piece?', a: 'Yes, you can ask. Enter the quantity in the enquiry form or mention it on WhatsApp and we will confirm availability.' },
+];
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Imitation Jewellery', href: shopUrl },
+  { name: category.data.name, href: categoryUrl(category.id) },
+  { name: d.name, href: url },
+];
+const title = d.seoTitle ?? brandTitle(`${d.name} | ${category.data.name}`);
+const description = d.seoDescription ?? `${d.summary} Product code ${d.sku}. Ask for price, stock and a video on WhatsApp.`.slice(0, 165);
+---
+<BaseLayout
+  title={title}
+  description={description}
+  image={optimised[0].src}
+  imageAlt={d.images[0].alt}
+  type="product"
+  crumbs={crumbs}
+  whatsappMessage={waMessage}
+  noindex={d.sample}
+  schema={[productSchema(product, url, imageUrls, category.data.name, Astro.site!), faqPage(productFaq)]}
+>
+  <article class="container pdp" data-sku={d.sku}>
+    <div class="gallery" data-gallery>
+      <div class="slides" data-slides tabindex="0" aria-label="Product images, swipe or use arrow keys">
+        {d.images.map((img, i) => (
+          <figure class="slide" data-zoom>
+            <Image src={img.src} alt={img.alt} widths={[480, 800, 1200]} sizes="(min-width: 960px) 50vw, 100vw" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'auto'} />
+          </figure>
+        ))}
+      </div>
+      {d.images.length > 1 && (
+        <div class="thumbs" role="group" aria-label="Choose image">
+          {d.images.map((img, i) => (
+            <button type="button" data-thumb={i} aria-label={`Show image ${i + 1} of ${d.images.length}`} aria-current={i === 0 ? 'true' : undefined}>
+              <Image src={img.src} alt="" width={120} loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div class="info">
+      <a class="eyebrow cat" href={categoryUrl(category.id)}>{category.data.name}</a>
+      <h1>{d.name}</h1>
+      <p class="sku">Product code: <strong>{d.sku}</strong></p>
+      <p class="price">{d.price ? formatPrice(d.price) : 'Price on request'}</p>
+      <p class="summary">{d.summary}</p>
+
+      <div class="ctas">
+        <a class="btn btn--whatsapp btn--block" href={whatsappLink(waMessage)} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="product_primary" data-product={d.sku}>
+          <Icon name="whatsapp" /> Ask price &amp; availability
+        </a>
+        <div class="two">
+          <a class="btn btn--outline" href="#enquiry" data-track="enquiry_form_open" data-location="product" data-product={d.sku}>Send enquiry</a>
+          <a class="btn btn--outline" href="/catalogue/" data-track="catalogue_cta_click" data-location="product">Get catalogue</a>
+        </div>
+      </div>
+
+      <ul class="assure">
+        <li><Icon name="chat" size={18} /> Video of this piece on request</li>
+        <li><Icon name="gift" size={18} /> Need more than one? <a href="/bulk-and-gifting-orders/">Bulk &amp; gifting orders</a></li>
+        {site.serviceFacts.shipsPanIndia && <li><Icon name="truck" size={18} /> Delivery across India</li>}
+      </ul>
+
+      <dl class="specs">
+        {specs.map(([k, v]) => (<div><dt>{k}</dt><dd>{v}</dd></div>))}
+      </dl>
+
+      <div class="desc prose">
+        <h2>About this design</h2>
+        <Content />
+      </div>
+
+      {myCollections.length > 0 && (
+        <div class="tags">
+          <h2>Part of</h2>
+          <ul>{myCollections.map((c) => <li><a href={collectionUrl(c.id)}>{c.data.name}</a></li>)}</ul>
+        </div>
+      )}
+    </div>
+  </article>
+
+  <section class="section section--surface" id="enquiry-section">
+    <div class="container form-grid">
+      <div>
+        <span class="eyebrow">Enquire about this piece</span>
+        <h2>Get the price, stock and a video</h2>
+        <p class="lede">Fill in your details and we will reply on WhatsApp. The product code is already included.</p>
+        <FaqList items={productFaq} heading="Questions about this product" headingLevel="h3" />
+      </div>
+      <EnquiryForm kind="product" product={productLabel} id="enquiry" />
+    </div>
+  </section>
+
+  {relatedItems.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div><span class="eyebrow">You may also like</span><h2>Designs that go with this one</h2></div>
+          <a class="link-arrow" href={categoryUrl(category.id)}>All {category.data.name.toLowerCase()}</a>
+        </div>
+        <div class="grid grid--products">
+          {relatedItems.map((p) => <ProductCard product={p} categoryName={catName[p.data.category.id]} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .pdp { display: grid; gap: var(--s-6); padding-top: var(--s-5); padding-bottom: var(--section); }
+  @media (min-width: 960px) { .pdp { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--s-9); } }
+
+  .gallery { min-width: 0; }
+  @media (min-width: 960px) { .gallery { position: sticky; top: calc(var(--header-h) + 48px); align-self: start; } }
+  .slides { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); }
+  .slides::-webkit-scrollbar { display: none; }
+  @media (min-width: 960px) { .slides { margin: 0; } }
+  .slide { margin: 0; scroll-snap-align: start; aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface); cursor: zoom-in; }
+  .slide :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+  .slide.zoomed { cursor: zoom-out; }
+  .slide.zoomed :global(img) { transform: scale(2); }
+  .thumbs { display: flex; gap: var(--s-2); margin-top: var(--s-3); }
+  .thumbs button { width: 72px; aspect-ratio: 4 / 5; padding: 0; border: 1px solid transparent; background: var(--surface); cursor: pointer; opacity: 0.6; transition: opacity 0.2s, border-color 0.2s; }
+  .thumbs button[aria-current='true'] { opacity: 1; border-color: var(--ink); }
+  .thumbs :global(img) { width: 100%; height: 100%; object-fit: cover; }
+
+  .cat { text-decoration: none; }
+  h1 { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin-bottom: var(--s-3); }
+  .sku { font-size: 0.8125rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: var(--s-4); }
+  .sku strong { color: var(--ink); font-weight: 600; }
+  .price { font-size: 1.25rem; font-weight: 600; margin-bottom: var(--s-4); }
+  .summary { font-size: 1.0625rem; color: var(--ink-soft); }
+  .ctas { display: grid; gap: var(--s-2); margin: var(--s-6) 0 var(--s-5); }
+  .ctas .btn--whatsapp { min-height: 54px; font-size: 0.875rem; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); }
+  .assure { list-style: none; padding: 0; margin: 0 0 var(--s-6); display: grid; gap: var(--s-3); font-size: 0.9375rem; }
+  .assure li { display: flex; gap: var(--s-3); align-items: center; }
+  .assure :global(svg) { color: var(--gold); flex: none; }
+  .assure a { color: var(--gold-text); }
+  .specs { margin: 0 0 var(--s-6); border-top: 1px solid var(--line); }
+  .specs div { display: grid; grid-template-columns: 140px 1fr; gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+  .specs dt { color: var(--muted); }
+  .specs dd { margin: 0; }
+  .desc h2, .tags h2 { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-text); margin: 0 0 var(--s-3); }
+  .tags { margin-top: var(--s-6); }
+  .tags ul { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; padding: 0; margin: 0; }
+  .tags a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s-4); border: 1px solid var(--line); border-radius: 999px; font-size: 0.8125rem; text-decoration: none; }
+  .tags a:hover { border-color: var(--ink); }
+
+  .form-grid { display: grid; gap: var(--s-7); }
+  @media (min-width: 960px) { .form-grid { grid-template-columns: 1fr 1fr; gap: var(--s-9); align-items: start; } }
+  .form-grid :global(.faq) { margin-top: var(--s-6); }
+  .form-grid :global(.faq-h) { font-size: 1.4rem; margin-bottom: var(--s-3); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((g) => {
+    const track = g.querySelector<HTMLElement>('[data-slides]')!;
+    const slides = Array.from(g.querySelectorAll<HTMLElement>('[data-zoom]'));
+    const thumbs = Array.from(g.querySelectorAll<HTMLButtonElement>('[data-thumb]'));
+    const go = (i: number) => track.scrollTo({ left: slides[i].offsetLeft - track.offsetLeft, behavior: 'smooth' });
+    const current = () => Math.round(track.scrollLeft / track.clientWidth);
+
+    thumbs.forEach((t, i) => t.addEventListener('click', () => go(i)));
+    track.addEventListener('scroll', () => {
+      const i = current();
+      thumbs.forEach((t, j) => t.setAttribute('aria-current', String(i === j)));
+    }, { passive: true });
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') go(Math.min(current() + 1, slides.length - 1));
+      if (e.key === 'ArrowLeft') go(Math.max(current() - 1, 0));
+    });
+
+    // Click-to-zoom on pointer devices, following the cursor.
+    if (window.matchMedia('(hover: hover)').matches) {
+      slides.forEach((s) => {
+        const img = s.querySelector('img')!;
+        s.addEventListener('click', () => s.classList.toggle('zoomed'));
+        s.addEventListener('mousemove', (e) => {
+          const r = s.getBoundingClientRect();
+          img.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+        });
+        s.addEventListener('mouseleave', () => s.classList.remove('zoomed'));
+      });
+    }
+  });
+</script>
