@@ -79,4 +79,17 @@ docs/                   plan, keyword plan, report
 
 ## Deploy
 
-Any static host works (Netlify, Vercel, Cloudflare Pages, GitHub Pages). Build command `npm run build`, output directory `dist`, environment variable `SITE_URL=https://your-domain`.
+**GitHub Pages (current):** every push to `main` builds and deploys through `.github/workflows/deploy.yml` to
+https://starsalma.github.io/Royalty-website/. One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
+
+Because a project site lives under `/Royalty-website/`, the workflow sets `BASE_PATH=/Royalty-website`, and `integrations/base-path.mjs` prefixes it onto every internal link after the build. Keep writing plain root links (`/imitation-jewellery/`) in code and content.
+
+**Custom domain later:** add the domain in Settings → Pages, then in the workflow set `SITE_URL=https://your-domain` and delete `BASE_PATH`.
+
+Any other static host works too (Netlify, Vercel, Cloudflare Pages): build command `npm run build`, output `dist`, env `SITE_URL=https://your-domain`.
+
+To test a GitHub Pages build locally in Git Bash, disable path conversion so `/Royalty-website` is not rewritten into a Windows path:
+
+```bash
+MSYS_NO_PATHCONV=1 SITE_URL=https://starsalma.github.io BASE_PATH=/Royalty-website npm run build
+```

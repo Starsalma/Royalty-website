@@ -41,7 +41,7 @@ const origin = Astro.site!;
 const canonical = Astro.props.canonical ?? new URL(Astro.url.pathname, origin).href;
 // Social networks do not render SVG, so SVG placeholders fall back to the default PNG card.
 const ogImage = new URL(image.endsWith('.svg') ? site.ogImage : image, origin).href;
-const isHome = Astro.url.pathname === '/';
+const isHome = Astro.url.pathname.replace(/\/?$/, '/') === import.meta.env.BASE_URL.replace(/\/?$/, '/');
 
 const ld = graph(
   isHome ? organization(origin) : null,

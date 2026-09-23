@@ -86,7 +86,7 @@ const categories = await allCategories();
   input.addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(() => run(input.value), 150); });
   input.addEventListener('blur', () => { if (input.value) track('search', { search_term: input.value }); });
 
-  fetch('/search-index.json').then((r) => r.json()).then((data: Item[]) => {
+  fetch(`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}search-index.json`).then((r) => r.json()).then((data: Item[]) => {
     index = data;
     const q = new URLSearchParams(location.search).get('q') || '';
     input.value = q;
