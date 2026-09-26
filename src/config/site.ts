@@ -39,6 +39,16 @@ export const site = {
     pinterest: '',
   },
 
+  // Bundle offer (/bundle-offer/): customers pick any N pieces and send the list on WhatsApp.
+  // PLACEHOLDER: set price to the real bundle price in INR (e.g. 999). While it is null the
+  // page never shows a number; it says a special bundle price is shared on WhatsApp.
+  bundle: {
+    enabled: true,
+    pieces: 3,
+    price: null as number | null,
+    eligibleCategories: [] as string[], // e.g. ['earrings']. Empty = every product qualifies.
+  },
+
   // Catalogue PDF. Leave empty until a real catalogue exists: the site then
   // offers "request the catalogue on WhatsApp" instead of a download.
   cataloguePdf: '',
@@ -63,6 +73,7 @@ export const nav = [
   { label: 'Shop All', href: '/imitation-jewellery/' },
   { label: 'Earrings', href: '/imitation-jewellery/earrings/' },
   { label: 'Necklace Sets', href: '/imitation-jewellery/necklace-sets/' },
+  ...(site.bundle.enabled ? [{ label: `Pick ${site.bundle.pieces} Offer`, href: '/bundle-offer/' }] : []),
   { label: 'Bridal', href: '/collections/bridal-jewellery/' },
   { label: 'Collections', href: '/collections/' },
   { label: 'Bulk & Gifting', href: '/bulk-and-gifting-orders/' },

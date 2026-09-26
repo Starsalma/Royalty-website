@@ -1,0 +1,249 @@
+---
+/**
+ * "Pick any N" bundle offer. Customers tap products to build a bundle, then send
+ * the list (names + codes) to WhatsApp in one message. The price is shown only
+ * when site.bundle.price is set; otherwise the page promises a special price on
+ * WhatsApp and never invents a number.
+ */
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import FaqList from '../components/FaqList.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+import { allProducts, allCategories, formatPrice } from '../lib/catalog';
+import { productUrl } from '../lib/urls';
+import { faqPage, itemList } from '../lib/schema';
+
+const b = site.bundle;
+const [products, categories] = await Promise.all([allProducts(), allCategories()]);
+const eligible = b.eligibleCategories.length
+  ? products.filter((p) => (b.eligibleCategories as readonly string[]).includes(p.data.category.id))
+  : products;
+const catName = Object.fromEntries(categories.map((c) => [c.id, c.data.name]));
+const usedCats = categories.filter((c) => eligible.some((p) => p.data.category.id === c.id));
+const n = b.pieces;
+const priceLine = b.price ? `Any ${n} for ${formatPrice(b.price)}` : `Special price when you buy any ${n}`;
+const scope = b.eligibleCategories.length ? usedCats.map((c) => c.data.name.toLowerCase()).join(' and ') : 'earrings, necklace sets, bangles, rings or tikkas';
+
+const faq = [
+  { q: `How does the Pick ${n} offer work?`, a: `Tap any ${n} designs on this page, then press "Send my bundle on WhatsApp". Your list goes to us with product codes, and we confirm ${b.price ? 'availability' : 'the bundle price and availability'} on the same chat.` },
+  { q: 'Can I mix different types of jewellery?', a: b.eligibleCategories.length ? `The offer covers ${scope}. You can mix any of these.` : 'Yes. Mix earrings, necklace sets, bangles and more in one bundle.' },
+  { q: `Can I pick more than ${n} pieces?`, a: `Yes. Select as many as you like and we will work out the best price for the full list on WhatsApp.` },
+  { q: 'Can I choose the same design in different colours?', a: 'Yes. Select the design once and mention the colours you want in the WhatsApp message.' },
+  { q: 'Is this a good option for gifts?', a: `Yes. A bundle of ${n} is an easy way to buy for sisters, friends or bridesmaids. For larger quantities, see our bulk and gifting page.` },
+];
+---
+<BaseLayout
+  title={`Pick Any ${n} Jewellery Bundle Offer | Royalty`}
+  description={`Build your own jewellery bundle: pick any ${n} designs from Royalty and get a special bundle price. Send your picks on WhatsApp in one tap.`}
+  crumbs={[{ name: 'Home', href: '/' }, { name: `Pick ${n} Offer`, href: '/bundle-offer/' }]}
+  schema={[faqPage(faq), itemList(`Pick ${n} bundle offer`, eligible.map(productUrl), Astro.site!)]}
+  whatsappMessage={`Hi ${site.name}, I would like to know about the Pick ${n} bundle offer.`}
+>
+  <PageIntro eyebrow="Bundle offer" title={`Pick any ${n}. Pay one special price.`} intro={`Choose any ${n} designs from ${scope}, and send your picks to us on WhatsApp in one tap. Perfect for gifting, or for refreshing your own collection.`}>
+    <p class="price-line"><span>{priceLine}</span></p>
+  </PageIntro>
+
+  <section class="container steps-wrap">
+    <ol class="steps">
+      <li><span class="n">1</span><div><strong>Tap {n} designs</strong><p>Tap any card below to add it to your bundle.</p></div></li>
+      <li><span class="n">2</span><div><strong>Send on WhatsApp</strong><p>Your list goes to us with names and product codes.</p></div></li>
+      <li><span class="n">3</span><div><strong>Confirm & receive</strong><p>We confirm {b.price ? 'stock' : 'the bundle price and stock'}, then payment and delivery.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="container picker" data-bundle data-pieces={n} data-brand={site.name} data-wa={site.whatsappNumber} data-price={b.price ?? ''}>
+    <div class="bar">
+      <h2 class="h">Choose your designs</h2>
+      {usedCats.length > 1 && (
+        <div class="chips" role="group" aria-label="Show category">
+          <button type="button" class="chip" aria-pressed="true" data-cat="all">All</button>
+          {usedCats.map((c) => <button type="button" class="chip" aria-pressed="false" data-cat={c.id}>{c.data.name}</button>)}
+        </div>
+      )}
+    </div>
+
+    <ul class="grid-b">
+      {eligible.map((p, i) => (
+        <li data-item data-cat={p.data.category.id} data-sku={p.data.sku} data-name={p.data.name}>
+          <button type="button" class="pick" aria-pressed="false" aria-label={`Add ${p.data.name} to bundle`}>
+            <span class="media">
+              <Image src={p.data.images[0].src} alt={p.data.images[0].alt} widths={[300, 480]} sizes="(min-width: 1100px) 260px, (min-width: 700px) 30vw, 46vw" loading={i < 4 ? 'eager' : 'lazy'} />
+              <span class="tick" aria-hidden="true"><Icon name="check" size={18} /></span>
+            </span>
+            <span class="meta">{catName[p.data.category.id]} · {p.data.sku}</span>
+            <span class="name">{p.data.name}</span>
+            <span class="state" aria-hidden="true"></span>
+          </button>
+          <a class="view" href={productUrl(p)}>View details</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <div class="tray" data-tray aria-live="polite">
+    <div class="container tray-in">
+      <div class="count">
+        <strong data-count>0</strong> of {n} picked
+        <span class="dots" aria-hidden="true">{Array.from({ length: n }, () => <i></i>)}</span>
+      </div>
+      <p class="hint" data-hint>Tap {n} designs to build your bundle</p>
+      <div class="tray-actions">
+        <button type="button" class="btn btn--outline btn--sm" data-clear hidden>Clear</button>
+        <a class="btn btn--whatsapp" href="#" data-send aria-disabled="true"><Icon name="whatsapp" /> Send<span class="wide"> my bundle</span></a>
+      </div>
+    </div>
+  </div>
+
+  <section class="section section--surface">
+    <div class="container faq-grid">
+      <FaqList items={faq} heading={`Pick ${n} offer: questions`} />
+      <aside class="aside">
+        <h2>Buying 10 or more?</h2>
+        <p>For bridesmaid sets, return gifts or corporate gifting, we can suggest matching designs for the full quantity.</p>
+        <a class="link-arrow" href="/bulk-and-gifting-orders/">Bulk &amp; gifting orders</a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .price-line { margin-top: var(--s-5); }
+  .price-line span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s-5); border: 1px solid var(--gold); color: var(--gold-text); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.8125rem; }
+
+  .steps-wrap { padding-bottom: var(--s-7); }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-4); }
+  @media (min-width: 800px) { .steps { grid-template-columns: repeat(3, 1fr); gap: var(--s-6); } }
+  .steps li { display: flex; gap: var(--s-4); align-items: flex-start; }
+  .steps .n { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); font-family: var(--font-serif); font-size: 1.25rem; color: var(--gold-text); }
+  .steps p { margin: 2px 0 0; color: var(--muted); font-size: 0.9375rem; }
+
+  .picker { padding-bottom: var(--s-9); }
+  .bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-4); padding: var(--s-4) 0; border-top: 1px solid var(--line); margin-bottom: var(--s-5); }
+  .h { font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem); margin: 0; }
+  .chips { display: flex; gap: var(--s-2); overflow-x: auto; scrollbar-width: none; }
+  .chip { flex: none; min-height: 40px; padding: 0 var(--s-4); border: 1px solid var(--line); border-radius: 999px; background: var(--ivory); font-size: 0.8125rem; cursor: pointer; }
+  .chip[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
+
+  .grid-b { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5) var(--s-3); }
+  @media (min-width: 700px) { .grid-b { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 1100px) { .grid-b { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-6) var(--s-5); } }
+  .pick { display: flex; flex-direction: column; align-items: stretch; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+  .media { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--radius); background: var(--surface); outline: 2px solid transparent; outline-offset: -2px; transition: outline-color 0.2s; }
+  .media :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--ease); }
+  .pick:hover .media :global(img) { transform: scale(1.03); }
+  .tick { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: rgb(251 248 243 / 0.92); border: 1px solid var(--line); color: transparent; transition: all 0.2s; }
+  .pick[aria-pressed='true'] .media { outline-color: var(--gold-text); }
+  .pick[aria-pressed='true'] .tick { background: var(--gold-text); border-color: var(--gold-text); color: #fff; }
+  .meta { margin-top: var(--s-3); font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .name { font-family: var(--font-serif); font-size: clamp(1.05rem, 1rem + 0.3vw, 1.25rem); line-height: 1.25; margin-top: 4px; }
+  .state { margin-top: var(--s-2); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-text); }
+  .state::before { content: '+ Add to bundle'; }
+  .pick[aria-pressed='true'] .state::before { content: '✓ In your bundle'; }
+  .view { display: inline-block; margin-top: var(--s-2); font-size: 0.8125rem; color: var(--muted); }
+  [data-item][hidden] { display: none; }
+
+  .tray { position: sticky; bottom: 0; z-index: 30; background: rgb(251 248 243 / 0.97); border-top: 1px solid var(--line); backdrop-filter: blur(8px); box-shadow: 0 -8px 30px rgb(28 27 25 / 0.06); }
+  /* The tray carries its own WhatsApp button, so the site-wide mobile bar is hidden here. */
+  @media (max-width: 899px) { :global(.mobile-bar) { display: none !important; } .tray { padding-bottom: env(safe-area-inset-bottom); } }
+  .tray-in { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: var(--s-2) var(--s-3); padding-block: var(--s-3); }
+  .count { font-size: 0.9375rem; display: flex; align-items: center; gap: var(--s-3); white-space: nowrap; }
+  .count strong { font-family: var(--font-serif); font-size: 1.5rem; }
+  .dots { display: inline-flex; gap: 4px; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--gold); }
+  .dots i.on { background: var(--gold-text); border-color: var(--gold-text); }
+  .hint { display: none; margin: 0; font-size: 0.8125rem; color: var(--muted); }
+  .tray-actions { display: flex; gap: var(--s-2); justify-content: flex-end; min-width: 0; }
+  .wide, .dots { display: none; }
+  .tray-actions .btn { min-height: 48px; padding: 0 var(--s-4); }
+  .tray-actions .btn--whatsapp { flex: 1; }
+  .tray-actions [aria-disabled='true'] { opacity: 0.45; pointer-events: none; }
+  @media (min-width: 900px) {
+    .tray-in { grid-template-columns: auto 1fr auto; }
+    .hint { display: block; }
+    .wide { display: inline; }
+    .dots { display: inline-flex; }
+    .tray-actions .btn--whatsapp { flex: none; }
+  }
+
+  .faq-grid { display: grid; gap: var(--s-7); }
+  @media (min-width: 1000px) { .faq-grid { grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s-9); } }
+  .aside { padding: var(--s-6); background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); align-self: start; }
+  .aside h2 { font-size: 1.6rem; }
+  .aside p { color: var(--muted); }
+</style>
+
+<script>
+  import { track } from '../scripts/analytics';
+
+  const root = document.querySelector<HTMLElement>('[data-bundle]');
+  if (root) {
+    const n = Number(root.dataset.pieces);
+    const brand = root.dataset.brand;
+    const wa = root.dataset.wa;
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-item]'));
+    const countEl = document.querySelector('[data-count]')!;
+    const dots = Array.from(document.querySelectorAll('.dots i'));
+    const hint = document.querySelector<HTMLElement>('[data-hint]')!;
+    const send = document.querySelector<HTMLAnchorElement>('[data-send]')!;
+    const clear = document.querySelector<HTMLButtonElement>('[data-clear]')!;
+    const picked: HTMLElement[] = [];
+
+    const render = () => {
+      const k = picked.length;
+      countEl.textContent = String(k);
+      dots.forEach((d, i) => d.classList.toggle('on', i < k));
+      clear.hidden = k === 0;
+      hint.textContent =
+        k === 0 ? `Tap ${n} designs to build your bundle`
+        : k < n ? `${n - k} more to complete your bundle: ${picked.map((p) => p.dataset.sku).join(', ')}`
+        : `Bundle ready: ${picked.map((p) => p.dataset.sku).join(', ')}`;
+      if (k === 0) { send.setAttribute('aria-disabled', 'true'); send.href = '#'; return; }
+      const lines = [
+        `Hi ${brand}, I would like the Pick ${n} bundle:`,
+        ...picked.map((p, i) => `${i + 1}. ${p.dataset.name} (Code: ${p.dataset.sku})`),
+        k < n ? `(I have picked ${k} so far, please suggest more.)` : '',
+        'Please confirm the bundle price and availability.',
+      ].filter(Boolean);
+      const text = encodeURIComponent(lines.join('\n'));
+      send.href = wa ? `https://wa.me/${wa}?text=${text}` : `https://wa.me/?text=${text}`;
+      send.target = '_blank';
+      send.rel = 'noopener';
+      send.removeAttribute('aria-disabled');
+    };
+
+    const toggle = (item: HTMLElement, on?: boolean) => {
+      const btn = item.querySelector<HTMLButtonElement>('.pick')!;
+      const idx = picked.indexOf(item);
+      const next = on ?? idx === -1;
+      if (next && idx === -1) picked.push(item);
+      if (!next && idx !== -1) picked.splice(idx, 1);
+      btn.setAttribute('aria-pressed', String(next));
+      btn.setAttribute('aria-label', `${next ? 'Remove' : 'Add'} ${item.dataset.name} ${next ? 'from' : 'to'} bundle`);
+    };
+
+    items.forEach((item) => item.querySelector('.pick')!.addEventListener('click', () => { toggle(item); render(); }));
+    clear.addEventListener('click', () => { [...picked].forEach((i) => toggle(i, false)); render(); });
+    send.addEventListener('click', () => {
+      if (!picked.length) return;
+      track('bundle_enquiry', { items: picked.length, product: picked.map((p) => p.dataset.sku).join(',') });
+    });
+
+    // Category chips.
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('.chip'));
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      const cat = chip.dataset.cat;
+      items.forEach((i) => { i.hidden = cat !== 'all' && i.dataset.cat !== cat; });
+    }));
+
+    // Pre-select from product pages: /bundle-offer/?add=RY-NS-211
+    const add = new URLSearchParams(location.search).get('add');
+    if (add) {
+      const hit = items.find((i) => i.dataset.sku === add);
+      if (hit) { toggle(hit, true); hit.scrollIntoView({ block: 'center' }); }
+    }
+    render();
+  }
+</script>

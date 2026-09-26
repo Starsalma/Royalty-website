@@ -49,6 +49,7 @@ const year = new Date().getFullYear();
         <ul>
           <li><a href="/contact/">Contact us</a></li>
           <li><a href="/faq/">FAQ</a></li>
+          {site.bundle.enabled && <li><a href="/bundle-offer/">Pick {site.bundle.pieces} bundle offer</a></li>}
           <li><a href="/catalogue/">Request catalogue</a></li>
           <li><a href="/bulk-and-gifting-orders/">Bulk &amp; gifting orders</a></li>
           <li><a href="/shipping-and-returns/">Shipping &amp; returns</a></li>

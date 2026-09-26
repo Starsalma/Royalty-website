@@ -110,6 +110,7 @@ const description = d.seoDescription ?? `${d.summary} Product code ${d.sku}. Ask
 
       <ul class="assure">
         <li><Icon name="chat" size={18} /> Video of this piece on request</li>
+        {site.bundle.enabled && <li><Icon name="layers" size={18} /> <a href={`/bundle-offer/?add=${d.sku}`} data-track="bundle_cta_click" data-location="product" data-product={d.sku}>Add to a Pick {site.bundle.pieces} bundle</a> for a special price</li>}
         <li><Icon name="gift" size={18} /> Need more than one? <a href="/bulk-and-gifting-orders/">Bulk &amp; gifting orders</a></li>
         {site.serviceFacts.shipsPanIndia && <li><Icon name="truck" size={18} /> Delivery across India</li>}
       </ul>

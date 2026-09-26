@@ -13,6 +13,7 @@ import { categoryUrl, collectionUrl } from '../lib/urls';
 import { whatsappLink, messages } from '../lib/contact';
 import { faqPage } from '../lib/schema';
 import { generalFaq } from '../config/faq';
+import { site } from '../config/site';
 import hero from '../assets/placeholders/hero.svg';
 import bridal from '../assets/placeholders/banner-bridal.svg';
 
@@ -85,6 +86,19 @@ const homeFaq = generalFaq.slice(0, 5);
       </div>
     </div>
   </section>
+
+  {site.bundle.enabled && (
+    <section class="section section--tight bundle-band" aria-labelledby="bundle-h">
+      <div class="container bundle-in" data-reveal>
+        <div>
+          <span class="eyebrow">Bundle offer</span>
+          <h2 id="bundle-h">Pick any {site.bundle.pieces}. Pay one special price.</h2>
+          <p class="lede">Mix earrings, necklace sets and bangles. Tap your favourites and send the list to us on WhatsApp in one go.</p>
+        </div>
+        <a class="btn btn--gold" href="/bundle-offer/" data-track="bundle_cta_click" data-location="home">Build your bundle</a>
+      </div>
+    </section>
+  )}
 
   <!-- Bridal editorial -->
   <section class="bridal section--noir" aria-labelledby="bridal-h">
@@ -243,4 +257,9 @@ const homeFaq = generalFaq.slice(0, 5);
   @media (min-width: 960px) { .bulk { grid-template-columns: 1.4fr 1fr; } .bulk .btn-row { justify-content: flex-end; } }
 
   .faq-wrap { display: grid; gap: var(--s-5); }
+  .bundle-band { border-block: 1px solid var(--line); }
+  .bundle-in { display: grid; gap: var(--s-5); align-items: center; }
+  .bundle-in h2 { margin-bottom: var(--s-3); }
+  .bundle-in .lede { margin: 0; }
+  @media (min-width: 900px) { .bundle-in { grid-template-columns: 1fr auto; } }
 </style>

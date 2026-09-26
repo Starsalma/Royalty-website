@@ -59,11 +59,13 @@ Set `gtmId` (recommended) or `ga4Id` in `src/config/site.ts`. Events go to `wind
 | `catalogue_cta_click` | Any "Request catalogue" link | `location` |
 | `catalogue_download` | PDF download (once a PDF exists) | `location` |
 | `enquiry_form_open` | "Send enquiry" on product page | `product` |
+| `bundle_enquiry` | "Send my bundle" on the Pick-N page | `items`, `product` (comma-separated codes) |
+| `bundle_cta_click` | Any link to the bundle page | `location`, `product` |
 | `filter_apply` | Filter or sort changed | `filters`, `results` |
 | `search` | Search submitted | `search_term`, `results` |
 | `social_click` | Footer social icons | `location` |
 
-In GA4, mark `whatsapp_click`, `phone_click`, `product_enquiry`, `quote_form_submit` and `catalogue_request` as **key events**.
+In GA4, mark `whatsapp_click`, `bundle_enquiry`, `phone_click`, `product_enquiry`, `quote_form_submit` and `catalogue_request` as **key events**.
 
 ## 6. Remaining placeholders (must fix before launch)
 
@@ -79,6 +81,7 @@ Search the code for `<Todo` and `PLACEHOLDER`.
 - [ ] **Replace all 18 sample products** with real products and real photos, then delete the sample files
 - [ ] Replace placeholder SVG art (category/collection/blog images, hero, bridal banner) with photography
 - [ ] Real logo (currently a typographic wordmark), then re-run `node scripts/generate-brand-assets.mjs` or drop in your own icons
+- [ ] Bundle offer: set `bundle.price` (and optionally `eligibleCategories`) in `site.ts`, or set `enabled: false`
 - [ ] Catalogue PDF (optional): set `cataloguePdf`
 - [ ] Form endpoint (optional): set `formEndpoint` to also receive form leads by email
 
