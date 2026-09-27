@@ -10,7 +10,7 @@ const isActive = (href: string) => (href === '/imitation-jewellery/' ? path === 
 ---
 <header class="site-header" data-header>
   <div class="announce">
-    <p>Ask for price, stock and photos on WhatsApp. We reply personally.</p>
+    <p>{site.serviceFacts.freeShippingFrom ? `Free shipping on orders above ₹${site.serviceFacts.freeShippingFrom} · ` : ''}Ask for photos and videos on WhatsApp.</p>
   </div>
   <div class="container bar">
     <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-toggle>

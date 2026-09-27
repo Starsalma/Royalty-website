@@ -9,6 +9,7 @@ images:
     alt: "Gold-tone twisted cable bangle with tulip flowers set with clear white stones and a screw clasp"
 colours: [Gold, White]
 finish: "Gold tone"
+price: 499
 featured: true
 publishedAt: 2026-09-25
 ---

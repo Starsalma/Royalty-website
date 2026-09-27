@@ -17,7 +17,7 @@ const f = site.serviceFacts;
   <p>{f.dispatchTime ? `Orders are usually dispatched in ${f.dispatchTime}.` : <Todo text="Add usual dispatch time" />} We share tracking details on WhatsApp once your order ships.</p>
 
   <h2>Shipping charges</h2>
-  <p><Todo text="Add shipping charges or free-shipping threshold" /></p>
+  <p>{f.freeShippingFrom ? `Shipping is free on orders above ₹${f.freeShippingFrom}.` : ''} <Todo text="Add the shipping charge for orders below the free-shipping value" /></p>
 
   <h2>Cash on delivery</h2>
   <p>{f.cashOnDelivery === true ? 'Cash on delivery is available on eligible pin codes.' : f.cashOnDelivery === false ? 'We accept prepaid orders only.' : <Todo text="Confirm whether COD is offered" />}</p>

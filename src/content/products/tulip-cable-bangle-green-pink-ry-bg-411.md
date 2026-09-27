@@ -9,6 +9,7 @@ images:
     alt: "Gold-tone twisted cable bangle with tulip flowers set with green and pink stones and a screw clasp"
 colours: [Gold, Green, Pink]
 finish: "Gold tone"
+price: 499
 featured: true
 publishedAt: 2026-09-25
 ---

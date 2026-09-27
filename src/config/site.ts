@@ -29,6 +29,7 @@ export const site = {
     cashOnDelivery: null as boolean | null,
     dispatchTime: '', // e.g. '1 to 2 working days'
     returnPolicySummary: '', // e.g. '7-day exchange on unused pieces'
+    freeShippingFrom: 999 as number | null, // INR order value for free shipping; null = not offered
     bulkOrders: true, // bulk / gifting enquiries are accepted through the enquiry form
   },
 
@@ -45,7 +46,7 @@ export const site = {
   bundle: {
     enabled: true,
     pieces: 3,
-    price: null as number | null,
+    price: 1399 as number | null,
     eligibleCategories: [] as string[], // e.g. ['earrings']. Empty = every product qualifies.
   },
 

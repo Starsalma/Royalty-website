@@ -32,6 +32,7 @@ export const generalFaq: Faq[] = [
     q: 'Can I get your catalogue?',
     a: 'Yes. Request it on the catalogue page or on WhatsApp and we will send our latest designs.',
   },
+  ...(f.freeShippingFrom ? [{ q: 'Do you offer free shipping?', a: `Yes. Shipping is free on orders above ₹${f.freeShippingFrom}. Any two pieces or a Pick 3 bundle usually qualifies.` }] : []),
   ...(f.shipsPanIndia ? [{ q: 'Do you deliver across India?', a: `Yes, we deliver across India.${f.dispatchTime ? ` Orders are usually dispatched in ${f.dispatchTime}.` : ''}` }] : []),
   ...(f.shipsInternational !== null ? [{ q: 'Do you ship outside India?', a: f.shipsInternational ? 'Yes. Message us on WhatsApp with your country and we will confirm shipping options and charges.' : 'At the moment we deliver only within India.' }] : []),
   ...(f.cashOnDelivery !== null ? [{ q: 'Is cash on delivery available?', a: f.cashOnDelivery ? 'Yes, cash on delivery is available on eligible pin codes.' : 'We currently accept prepaid orders only. We will share payment options on WhatsApp.' }] : []),

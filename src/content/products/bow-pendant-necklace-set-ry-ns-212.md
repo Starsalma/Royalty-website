@@ -9,6 +9,7 @@ images:
     alt: "Gold-tone bow pendant necklace with stone-set loops and a pair of round solitaire stud earrings"
 colours: [Gold, White]
 finish: "Gold tone"
+price: 599
 material: "Stainless steel"
 featured: true
 publishedAt: 2026-09-25

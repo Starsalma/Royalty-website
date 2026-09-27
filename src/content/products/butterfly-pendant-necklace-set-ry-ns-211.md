@@ -9,6 +9,7 @@ images:
     alt: "Butterfly pendant necklace sets in green, pink, purple, yellow, magenta and blue, each with gold-tone butterfly stud earrings"
 colours: [Green, Pink, Purple, Yellow, Magenta, Blue]
 finish: "Gold tone"
+price: 549
 material: "Stainless steel"
 featured: true
 publishedAt: 2026-09-25
