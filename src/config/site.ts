@@ -77,5 +77,5 @@ export const nav = [
   { label: 'Bridal', href: '/collections/bridal-jewellery/' },
   { label: 'Collections', href: '/collections/' },
   { label: 'Bulk & Gifting', href: '/bulk-and-gifting-orders/' },
-  { label: 'Journal', href: '/blog/' },
+  { label: 'Trending', href: '/trending-jewellery/' },
 ];

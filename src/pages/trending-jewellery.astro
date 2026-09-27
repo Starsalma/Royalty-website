@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import { trends } from '../config/trends';
+import { site } from '../config/site';
+import { allProducts, formatPrice } from '../lib/catalog';
+import { productUrl, collectionUrl } from '../lib/urls';
+import { whatsappLink } from '../lib/contact';
+import { faqPage } from '../lib/schema';
+
+const products = await allProducts();
+const bySku = Object.fromEntries(products.filter((p) => !p.data.sample).map((p) => [p.data.sku, p]));
+const now = trends.filter((t) => t.status === 'now');
+const next = trends.filter((t) => t.status === 'next');
+const updated = 'September 2026';
+const ask = (name: string) => whatsappLink(`Hi ${site.name}, I love the ${name.toLowerCase()} trend. Do you have designs in this style? Please share photos and prices.`);
+
+const faq = [
+  { q: 'What jewellery is trending in 2026?', a: `Right now: ${now.map((t) => t.name.toLowerCase()).join(', ')}.` },
+  { q: 'What jewellery trends are coming next?', a: `Rising for the coming season: ${next.map((t) => t.name.toLowerCase()).join(', ')}.` },
+  { q: 'Is stainless steel jewellery good for daily wear?', a: 'Stainless steel is popular for everyday jewellery because it is durable and handles sweat and humidity better than many base metals. Check the material on each product page and follow simple care: keep pieces dry and store them separately.' },
+  { q: 'Can I request a trend that is not listed in your shop?', a: 'Yes. Tap "Ask for this style" on any trend and we will share matching designs we have or can source, with photos and prices.' },
+];
+---
+<BaseLayout
+  title="Jewellery Trends 2026: What's In Now & Coming Next | Royalty"
+  description="The jewellery trends of 2026: everyday stainless steel, bows, butterflies, layering, watch duos, modern pearls and coloured stones, plus what's coming next."
+  crumbs={[{ name: 'Home', href: '/' }, { name: 'Trending Jewellery', href: '/trending-jewellery/' }]}
+  schema={[faqPage(faq)]}
+>
+  <PageIntro eyebrow={`Trend report · Updated ${updated}`} title="Jewellery trends 2026: what's in now, and what's next" intro="What people are actually wearing and buying this season, with simple ways to wear each look. Where we have the style in stock, shop it below. Where we don't yet, ask us and we will find it.">
+    <nav class="jump" aria-label="Jump to a trend">
+      {trends.map((t) => <a href={`#${t.id}`}>{t.name.split(':')[0]}</a>)}
+    </nav>
+  </PageIntro>
+
+  <section class="container now">
+    <h2 class="group-h"><span class="eyebrow">Trending now</span></h2>
+    {now.map((t, i) => {
+      const shop = t.skus.map((s) => bySku[s]).filter(Boolean);
+      return (
+        <article class:list={['trend', { flip: i % 2 === 1 }]} id={t.id} data-reveal>
+          <div class="media">
+            <Image src={t.image} alt={t.imageAlt} widths={[480, 800, 1100]} sizes="(min-width: 960px) 45vw, 100vw" loading={i < 2 ? 'eager' : 'lazy'} />
+            <span class="badge">{t.photo ? 'Royalty piece' : 'Style illustration'}</span>
+          </div>
+          <div class="body">
+            <p class="kicker">{String(i + 1).padStart(2, '0')} · {t.kicker}</p>
+            <h2>{t.name}</h2>
+            <p class="why">{t.why}</p>
+            <h3 class="sub">How to wear it</h3>
+            <ul class="wear">{t.wear.map((w) => <li><Icon name="check" size={16} /> {w}</li>)}</ul>
+            {shop.length > 0 ? (
+              <div class="shop">
+                <h3 class="sub">Shop the look</h3>
+                <ul>
+                  {shop.map((p) => (
+                    <li>
+                      <a href={productUrl(p)}>
+                        <Image src={p.data.images[0].src} alt="" width={96} height={120} loading="lazy" />
+                        <span><span class="pn">{p.data.name}</span><span class="pm">{p.data.sku} · {p.data.price ? formatPrice(p.data.price) : 'Price on request'}</span></span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div class="btn-row">
+                <a class="btn btn--whatsapp btn--sm" href={ask(t.name)} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="trend_ask" data-product={t.id}><Icon name="whatsapp" /> Ask for this style</a>
+                {t.collection && <a class="btn btn--outline btn--sm" href={collectionUrl(t.collection)}>Browse related</a>}
+              </div>
+            )}
+          </div>
+        </article>
+      );
+    })}
+  </section>
+
+  <section class="section section--noir next">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Coming next</span>
+          <h2>Trends rising for the next season</h2>
+          <p class="lede">Styles showing up on runways and in trend forecasts. Tell us which ones you would like to see at Royalty.</p>
+        </div>
+      </div>
+      <div class="grid grid--3">
+        {next.map((t) => (
+          <article class="ncard" id={t.id} data-reveal>
+            <div class="nmedia"><Image src={t.image} alt={t.imageAlt} widths={[400, 700]} sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw" loading="lazy" /></div>
+            <h3>{t.name}</h3>
+            <p>{t.why}</p>
+            <a class="btn btn--ghost-light btn--sm" href={ask(t.name)} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="trend_next" data-product={t.id}><Icon name="whatsapp" /> I want this style</a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container"><FaqList items={faq} heading="Jewellery trends: common questions" /></div>
+  </section>
+
+  <CtaBand location="trends_band" title="Spotted a trend you love?" text="Send us a screenshot from Instagram or Pinterest. We will tell you what we have in that style, with photos, videos and prices." secondary={site.bundle.enabled ? { label: `Pick any ${site.bundle.pieces} offer`, href: '/bundle-offer/', track: 'bundle_cta_click' } : undefined} />
+</BaseLayout>
+
+<style>
+  .jump { display: flex; gap: var(--s-2); overflow-x: auto; margin-top: var(--s-5); padding-bottom: 4px; scrollbar-width: none; }
+  .jump a { flex: none; display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s-4); border: 1px solid var(--line); border-radius: 999px; font-size: 0.8125rem; text-decoration: none; }
+  .jump a:hover { border-color: var(--ink); }
+
+  .now { padding-bottom: var(--section); }
+  .group-h { margin: 0 0 var(--s-5); border-top: 1px solid var(--line); padding-top: var(--s-5); }
+  .trend { display: grid; gap: var(--s-5); padding-block: var(--s-7); border-bottom: 1px solid var(--line); scroll-margin-top: calc(var(--header-h) + 40px); }
+  @media (min-width: 960px) {
+    .trend { grid-template-columns: 1fr 1fr; gap: var(--s-9); align-items: center; padding-block: var(--s-8); }
+    .trend.flip .media { order: 2; }
+  }
+  .media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--radius); background: var(--surface); max-height: 640px; }
+  .media :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .badge { position: absolute; left: 12px; bottom: 12px; padding: 4px 10px; background: rgb(251 248 243 / 0.92); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+  .kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-text); margin-bottom: var(--s-3); }
+  .body h2 { font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.8rem); }
+  .why { font-size: 1.0625rem; color: var(--ink-soft); max-width: 56ch; }
+  .sub { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: var(--s-5) 0 var(--s-3); }
+  .wear { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-2); }
+  .wear li { display: flex; gap: var(--s-2); align-items: flex-start; }
+  .wear :global(svg) { color: var(--gold); flex: none; margin-top: 5px; }
+  .shop ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-2); }
+  .shop a { display: grid; grid-template-columns: 56px 1fr; gap: var(--s-3); align-items: center; padding: var(--s-2); border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; text-decoration: none; transition: border-color 0.2s; }
+  .shop a:hover { border-color: var(--ink); }
+  .shop :global(img) { width: 56px; height: 70px; object-fit: cover; border-radius: var(--radius); }
+  .pn { display: block; font-family: var(--font-serif); font-size: 1.125rem; line-height: 1.25; }
+  .pm { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; }
+  .body .btn-row { margin-top: var(--s-5); }
+
+  .next h2 { color: #fff; }
+  .ncard { scroll-margin-top: calc(var(--header-h) + 40px); }
+  .nmedia { aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--radius); margin-bottom: var(--s-4); }
+  .nmedia :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .ncard h3 { color: #fff; font-size: 1.6rem; }
+  .ncard p { color: #cfc6b8; font-size: 0.9375rem; }
+</style>

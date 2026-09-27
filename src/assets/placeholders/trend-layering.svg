@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF8F3"/><stop offset="1" stop-color="#EFE6D8"/></linearGradient>
+    <radialGradient id="gem" cx="0.35" cy="0.35" r="0.8"><stop offset="0" stop-color="#FFF7E6"/><stop offset="0.5" stop-color="#D9BF8C"/><stop offset="1" stop-color="#A8834B"/></radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3E5C4"/><stop offset="0.5" stop-color="#D9BF8C"/><stop offset="1" stop-color="#B8955A"/></linearGradient>
+  <radialGradient id="pearl" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#F1EADF"/><stop offset="1" stop-color="#D9CDBD"/></radialGradient></defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="900" rx="240" ry="20" fill="#8A6A35" opacity="0.08"/>
+  <path d="M170 200 Q400 440 630 200" fill="none" stroke="#A8834B" stroke-width="3" /><path d="M150 200 Q400 580 650 200" fill="none" stroke="#D9BF8C" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round"/><path d="M130 200 Q400 740 670 200" fill="none" stroke="#A8834B" stroke-width="3" /><circle cx="400" cy="330" r="14" fill="url(#gem)" stroke="#A8834B" stroke-width="2"/><path d="M400 438.2 C366.2 414.8 381.8 386.2 400 404.4 C418.2 386.2 433.8 414.8 400 438.2 Z" fill="url(#metal)" stroke="#A8834B" stroke-width="2"/><path d="M400 480 q-22 34 0 64 q22 -30 0 -64 Z" fill="url(#gem)" stroke="#A8834B" stroke-width="2"/>
+  <text x="756" y="970" text-anchor="end" font-family="Georgia, serif" font-size="18" letter-spacing="2" fill="#8A6A35" opacity="0.55">ILLUSTRATION</text>
+</svg>

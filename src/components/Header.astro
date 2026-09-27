@@ -42,6 +42,7 @@ const isActive = (href: string) => (href === '/imitation-jewellery/' ? path === 
         {nav.map((item) => (
           <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
         ))}
+        <li><a href="/blog/">Journal</a></li>
         <li><a href="/catalogue/">Request Catalogue</a></li>
         <li><a href="/about/">About Us</a></li>
         <li><a href="/contact/">Contact</a></li>

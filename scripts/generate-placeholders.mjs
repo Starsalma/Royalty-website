@@ -136,4 +136,79 @@ writeFileSync(
   new URL('og-default.svg', out),
   frame(1200, 630, 'ivory', '', necklace(600, 130, 200, 0.75)),
 );
+
+// ---- Trend illustrations (Trending Jewellery page). Labelled as illustrations, not products.
+const silver = '#AEB3BA';
+const chainArc = (cx, top, w, depth, stroke = gold, sw = 3, dash = '') =>
+  `<path d="M${cx - w} ${top} Q${cx} ${top + depth * 2} ${cx + w} ${top}" fill="none" stroke="${stroke}" stroke-width="${sw}" ${dash ? `stroke-dasharray="${dash}" stroke-linecap="round"` : ''}/>`;
+const heart = (x, y, s, fill = 'url(#metal)') =>
+  `<path d="M${x} ${y + 14 * s} C${x - 26 * s} ${y - 4 * s} ${x - 14 * s} ${y - 26 * s} ${x} ${y - 12 * s} C${x + 14 * s} ${y - 26 * s} ${x + 26 * s} ${y - 4 * s} ${x} ${y + 14 * s} Z" fill="${fill}" stroke="${gold}" stroke-width="2"/>`;
+
+const trends = {
+  layering: () =>
+    chainArc(400, 200, 230, 120, gold, 3) +
+    chainArc(400, 200, 250, 190, goldLight, 2, '2 9') +
+    chainArc(400, 200, 270, 270, gold, 3) +
+    gem(400, 330, 14) + heart(400, 420, 1.3) +
+    `<path d="M400 480 q-22 34 0 64 q22 -30 0 -64 Z" fill="url(#gem)" stroke="${gold}" stroke-width="2"/>`,
+  'watch-duo': () =>
+    `<rect x="170" y="330" width="60" height="340" rx="22" fill="none" stroke="${gold}" stroke-width="6"/>
+     <circle cx="200" cy="500" r="95" fill="#FBF8F3" stroke="${gold}" stroke-width="10"/>
+     <circle cx="200" cy="500" r="80" fill="none" stroke="${goldLight}" stroke-width="2"/>
+     <line x1="200" y1="500" x2="200" y2="440" stroke="${gold}" stroke-width="5" stroke-linecap="round"/>
+     <line x1="200" y1="500" x2="245" y2="520" stroke="${gold}" stroke-width="4" stroke-linecap="round"/>
+     <ellipse cx="560" cy="500" rx="150" ry="190" fill="none" stroke="${gold}" stroke-width="12"/>
+     <ellipse cx="560" cy="500" rx="150" ry="190" fill="none" stroke="${goldLight}" stroke-width="2" stroke-dasharray="1 16" stroke-linecap="round"/>
+     ${gem(560, 310, 14)}${gem(522, 316, 10)}${gem(598, 316, 10)}`,
+  pearls: () => {
+    let g = '';
+    for (let i = 0; i <= 16; i++) {
+      const a = Math.PI * (0.1 + (0.8 * i) / 16);
+      g += `<circle cx="${400 - Math.cos(a) * 240}" cy="${230 + Math.sin(a) * 250}" r="15" fill="url(#pearl)" stroke="#D8CFC2" stroke-width="1.5"/>`;
+    }
+    return g +
+      `<line x1="240" y1="620" x2="240" y2="690" stroke="${gold}" stroke-width="3"/><circle cx="240" cy="720" r="30" fill="url(#pearl)" stroke="#D8CFC2" stroke-width="1.5"/>${gem(240, 612, 12)}
+       <line x1="560" y1="620" x2="560" y2="690" stroke="${gold}" stroke-width="3"/><circle cx="560" cy="720" r="30" fill="url(#pearl)" stroke="#D8CFC2" stroke-width="1.5"/>${gem(560, 612, 12)}`;
+  },
+  charms: () =>
+    chainArc(400, 180, 260, 150, gold, 3) +
+    `<line x1="310" y1="440" x2="310" y2="480" stroke="${gold}" stroke-width="2"/>` + heart(310, 505, 1.2) +
+    `<line x1="400" y1="480" x2="400" y2="520" stroke="${gold}" stroke-width="2"/><path d="M430 560 a38 38 0 1 1 -18 -44 a30 30 0 1 0 18 44 Z" fill="url(#metal)" stroke="${gold}" stroke-width="2"/>` +
+    `<line x1="490" y1="440" x2="490" y2="480" stroke="${gold}" stroke-width="2"/><circle cx="490" cy="500" r="16" fill="none" stroke="${gold}" stroke-width="5"/><rect x="486" y="514" width="8" height="56" fill="${gold}"/><rect x="494" y="550" width="14" height="7" fill="${gold}"/><rect x="494" y="562" width="10" height="7" fill="${gold}"/>` +
+    `<circle cx="220" cy="760" r="70" fill="none" stroke="${gold}" stroke-width="9"/><line x1="220" y1="830" x2="220" y2="850" stroke="${gold}" stroke-width="2"/>${heart(220, 870, 0.8)}` +
+    `<circle cx="580" cy="760" r="70" fill="none" stroke="${gold}" stroke-width="9"/><line x1="580" y1="830" x2="580" y2="850" stroke="${gold}" stroke-width="2"/>${heart(580, 870, 0.8)}`,
+  hoops: () =>
+    `<ellipse cx="255" cy="480" rx="150" ry="170" fill="none" stroke="url(#metal)" stroke-width="26"/>
+     <ellipse cx="255" cy="480" rx="150" ry="170" fill="none" stroke="${gold}" stroke-width="2"/>
+     <ellipse cx="545" cy="480" rx="150" ry="170" fill="none" stroke="url(#metal)" stroke-width="26"/>
+     <ellipse cx="545" cy="480" rx="150" ry="170" fill="none" stroke="${gold}" stroke-width="2"/>
+     <path d="M330 760 c40 -60 100 -40 110 10 c10 50 -60 90 -110 40" fill="none" stroke="${gold}" stroke-width="10" stroke-linecap="round"/>`,
+  coastal: () =>
+    `<path d="M300 620 L200 420 Q300 330 400 420 Z" fill="url(#metal)" stroke="${gold}" stroke-width="3"/>
+     <path d="M300 620 L250 400 M300 620 L300 380 M300 620 L350 400" stroke="${gold}" stroke-width="2"/>
+     <path d="M560 380 l26 64 l68 4 l-52 44 l18 66 l-60 -38 l-60 38 l18 -66 l-52 -44 l68 -4 Z" fill="url(#metal)" stroke="${gold}" stroke-width="3"/>
+     <circle cx="430" cy="720" r="34" fill="#4FB3B0" stroke="${gold}" stroke-width="4"/>
+     ${chainArc(430, 250, 300, 170, goldLight, 2, '2 10')}`,
+  'mixed-metals': () => {
+    let g = '';
+    [-110, -40, 30, 100].forEach((dx, i) => {
+      const c = i % 2 ? silver : gold;
+      g += `<ellipse cx="${400 + dx}" cy="500" rx="140" ry="180" fill="none" stroke="${c}" stroke-width="${i % 2 ? 10 : 14}"/>`;
+    });
+    return g;
+  },
+  'colour-stones': () =>
+    `<path d="M200 300 Q400 470 600 300" fill="none" stroke="${gold}" stroke-width="16" stroke-linecap="round"/>
+     ${[['#2E7D5B', 260, 350], ['#A3263A', 330, 385], ['#2E7D5B', 400, 398], ['#A3263A', 470, 385], ['#2E7D5B', 540, 350]].map(([c, x, y]) => `<ellipse cx="${x}" cy="${y}" rx="22" ry="28" fill="${c}" stroke="${gold}" stroke-width="4"/>`).join('')}
+     <path d="M400 430 q-30 46 0 90 q30 -44 0 -90 Z" fill="#2E7D5B" stroke="${gold}" stroke-width="4"/>
+     ${jhumka(250, 640, 0.5)}${jhumka(550, 640, 0.5)}`,
+};
+const pearlDef = '<radialGradient id="pearl" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#F1EADF"/><stop offset="1" stop-color="#D9CDBD"/></radialGradient>';
+const trendTones = { layering: 'ivory', 'watch-duo': 'stone', pearls: 'blush', charms: 'ivory', hoops: 'sage', coastal: 'sage', 'mixed-metals': 'stone', 'colour-stones': 'blush' };
+for (const [name, draw] of Object.entries(trends)) {
+  writeFileSync(
+    new URL(`trend-${name}.svg`, out),
+    frame(W, H, trendTones[name], 'ILLUSTRATION', draw()).replace('</defs>', `${pearlDef}</defs>`),
+  );
+}
 console.log('placeholders written');

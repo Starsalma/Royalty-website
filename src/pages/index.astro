@@ -14,6 +14,7 @@ import { whatsappLink, messages } from '../lib/contact';
 import { faqPage } from '../lib/schema';
 import { generalFaq } from '../config/faq';
 import { site } from '../config/site';
+import { trends } from '../config/trends';
 import hero from '../assets/placeholders/hero.svg';
 import bridal from '../assets/placeholders/banner-bridal.svg';
 
@@ -99,6 +100,28 @@ const homeFaq = generalFaq.slice(0, 5);
       </div>
     </section>
   )}
+
+  <!-- Trending -->
+  <section class="section" aria-labelledby="trend-h">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Trend report 2026</span>
+          <h2 id="trend-h">What everyone is wearing right now</h2>
+        </div>
+        <a class="link-arrow" href="/trending-jewellery/">See all trends</a>
+      </div>
+      <div class="trend-strip">
+        {trends.filter((t) => t.status === 'now').slice(0, 4).map((t) => (
+          <a class="tcard" href={`/trending-jewellery/#${t.id}`} data-reveal>
+            <span class="tmedia"><Image src={t.image} alt={t.imageAlt} widths={[300, 480]} sizes="(min-width: 1100px) 25vw, (min-width: 720px) 45vw, 70vw" loading="lazy" /></span>
+            <span class="tk">{t.kicker}</span>
+            <span class="tn">{t.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
 
   <!-- Bridal editorial -->
   <section class="bridal section--noir" aria-labelledby="bridal-h">
@@ -257,6 +280,16 @@ const homeFaq = generalFaq.slice(0, 5);
   @media (min-width: 960px) { .bulk { grid-template-columns: 1.4fr 1fr; } .bulk .btn-row { justify-content: flex-end; } }
 
   .faq-wrap { display: grid; gap: var(--s-5); }
+  .trend-strip { display: grid; grid-auto-flow: column; grid-auto-columns: 70%; gap: var(--s-3); overflow-x: auto; scroll-snap-type: x mandatory; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); padding-bottom: var(--s-2); scrollbar-width: thin; }
+  .trend-strip > * { scroll-snap-align: start; }
+  @media (min-width: 720px) { .trend-strip { grid-auto-columns: 42%; } }
+  @media (min-width: 1100px) { .trend-strip { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; margin: 0; padding: 0; gap: var(--s-5); } }
+  .tcard { text-decoration: none; display: block; }
+  .tmedia { display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--radius); background: var(--surface); }
+  .tmedia :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease); }
+  .tcard:hover .tmedia :global(img) { transform: scale(1.04); }
+  .tk { display: block; margin-top: var(--s-3); font-size: 0.6875rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-text); }
+  .tn { display: block; font-family: var(--font-serif); font-size: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem); line-height: 1.2; margin-top: 4px; }
   .bundle-band { border-block: 1px solid var(--line); }
   .bundle-in { display: grid; gap: var(--s-5); align-items: center; }
   .bundle-in h2 { margin-bottom: var(--s-3); }
