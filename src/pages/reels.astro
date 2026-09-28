@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import { allProducts, formatPrice } from '../lib/catalog';
+import { productUrl, categoryUrl } from '../lib/urls';
+import { whatsappLink, messages } from '../lib/contact';
+import { site } from '../config/site';
+
+const products = await allProducts();
+const bySku = Object.fromEntries(products.filter((p) => !p.data.sample).map((p) => [p.data.sku, p]));
+
+const reels = [
+  {
+    id: 'introducing-royalty',
+    src: '/reels/introducing-royalty.mp4',
+    title: 'Introducing Royalty',
+    caption: 'Who we are and what we make: American diamond and CZ jewellery, priced and shared over WhatsApp.',
+    skus: [] as string[],
+    shopCategory: null as string | null,
+  },
+  {
+    id: 'collection',
+    src: '/reels/collection.mp4',
+    title: 'The Collection',
+    caption: 'A quick look across the range, from everyday studs to full bridal sets.',
+    skus: ['RY-NS-213', 'RY-NS-218'],
+    shopCategory: null,
+  },
+  {
+    id: 'pick-your-shade',
+    src: '/reels/pick-your-shade.mp4',
+    title: 'Pick Your Shade',
+    caption: 'The same design in different stone colours. Tell us your favourite when you ask on WhatsApp.',
+    skus: ['RY-ER-104', 'RY-NS-213', 'RY-ER-105'],
+    shopCategory: null,
+  },
+  {
+    id: '7-sets-7-days',
+    src: '/reels/7-sets-7-days.mp4',
+    title: '7 Sets, 7 Days',
+    caption: 'A different necklace set for every day of the week, from light daily wear to full bridal.',
+    skus: [],
+    shopCategory: 'necklace-sets',
+  },
+  {
+    id: 'statement-tops',
+    src: '/reels/statement-tops.mp4',
+    title: 'Statement Tops',
+    caption: 'Stud and drop earrings that carry a whole look on their own.',
+    skus: ['RY-ER-104', 'RY-ER-105'],
+    shopCategory: 'earrings',
+  },
+];
+
+const faq = [
+  { q: 'Can I get a video of the exact piece before I order?', a: 'Yes. These reels show the range, but ask on WhatsApp with a product code and we will send a fresh video of that exact piece in natural light.' },
+  { q: 'Do the reels show the true colour of each piece?', a: 'We try to film in natural light, but screens vary. Confirm the stone colour on WhatsApp before you order if it matters to you.' },
+];
+---
+<BaseLayout
+  title="Jewellery Reels: Watch Our Designs on Video | Royalty"
+  description="Watch Royalty's jewellery on video before you buy: the full collection, colour options, necklace sets and statement earrings."
+  crumbs={[{ name: 'Home', href: '/' }, { name: 'Reels', href: '/reels/' }]}
+>
+  <PageIntro
+    eyebrow="Watch first"
+    title="See it move before you buy"
+    intro="Photos show the design. Video shows how it actually catches light. Watch these reels, then ask us on WhatsApp for a video of the exact piece you want."
+  />
+
+  <section class="container reel-grid">
+    {reels.map((r) => {
+      const shopItems = r.skus.map((s) => bySku[s]).filter(Boolean);
+      return (
+        <article class="reel" id={r.id} data-reveal>
+          <div class="frame">
+            <video src={r.src} controls playsinline preload="metadata" aria-label={r.title}></video>
+          </div>
+          <div class="body">
+            <h2>{r.title}</h2>
+            <p>{r.caption}</p>
+            {shopItems.length > 0 && (
+              <ul class="shop">
+                {shopItems.map((p) => (
+                  <li>
+                    <a href={productUrl(p)}>
+                      <span class="pn">{p.data.name}</span>
+                      <span class="pm">{p.data.sku} · {p.data.price ? formatPrice(p.data.price) : 'Price on request'}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div class="btn-row">
+              <a class="btn btn--whatsapp btn--sm" href={whatsappLink(`Hi ${site.name}, I just watched the "${r.title}" reel. Please share prices and availability.`)} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="reel" data-product={r.id}>
+                <Icon name="whatsapp" /> Ask about this
+              </a>
+              {r.shopCategory && <a class="btn btn--outline btn--sm" href={categoryUrl(r.shopCategory)}>Shop this category</a>}
+            </div>
+          </div>
+        </article>
+      );
+    })}
+  </section>
+
+  <section class="section section--surface">
+    <div class="container faq-wrap">
+      <h2 class="faq-h">Reels: common questions</h2>
+      <dl class="faq">
+        {faq.map((f) => (<div><dt>{f.q}</dt><dd>{f.a}</dd></div>))}
+      </dl>
+    </div>
+  </section>
+
+  <CtaBand
+    location="reels_band"
+    title="Loved a design in one of these reels?"
+    text="Send us the reel name or a screenshot on WhatsApp and we will confirm the price, stock and colours."
+  />
+</BaseLayout>
+
+<style>
+  .reel-grid { display: grid; gap: var(--s-7); padding-bottom: var(--section); }
+  @media (min-width: 720px) { .reel-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-6); } }
+  .reel { scroll-margin-top: calc(var(--header-h) + 40px); }
+  .frame { aspect-ratio: 9 / 16; max-height: 640px; overflow: hidden; border-radius: var(--radius); background: var(--noir); }
+  .frame video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .body { padding-top: var(--s-4); }
+  .body h2 { font-size: 1.4rem; margin-bottom: var(--s-2); }
+  .body p { color: var(--muted); margin-bottom: var(--s-4); }
+  .shop { list-style: none; padding: 0; margin: 0 0 var(--s-4); display: grid; gap: var(--s-2); }
+  .shop a { display: flex; flex-direction: column; padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); text-decoration: none; transition: border-color 0.2s; }
+  .shop a:hover { border-color: var(--ink); }
+  .pn { font-family: var(--font-serif); font-size: 1rem; }
+  .pm { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; margin-top: 2px; }
+
+  .faq-wrap { max-width: 760px; }
+  .faq-h { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-text); margin-bottom: var(--s-5); }
+  .faq { display: grid; gap: var(--s-5); }
+  .faq dt { font-family: var(--font-serif); font-size: 1.15rem; margin-bottom: var(--s-2); }
+  .faq dd { margin: 0; color: var(--muted); }
+</style>

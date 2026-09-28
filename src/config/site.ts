@@ -74,6 +74,7 @@ export const nav = [
   { label: 'Shop All', href: '/imitation-jewellery/' },
   { label: 'Earrings', href: '/imitation-jewellery/earrings/' },
   { label: 'Necklace Sets', href: '/imitation-jewellery/necklace-sets/' },
+  { label: 'Reels', href: '/reels/' },
   ...(site.bundle.enabled ? [{ label: `Pick ${site.bundle.pieces} Offer`, href: '/bundle-offer/' }] : []),
   { label: 'Bridal', href: '/collections/bridal-jewellery/' },
   { label: 'Collections', href: '/collections/' },

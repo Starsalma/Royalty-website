@@ -88,6 +88,18 @@ const homeFaq = generalFaq.slice(0, 5);
     </div>
   </section>
 
+  <!-- Reels -->
+  <section class="section section--noir reels-band" aria-labelledby="reels-h">
+    <div class="container reels-in" data-reveal>
+      <div>
+        <span class="eyebrow">New: watch on video</span>
+        <h2 id="reels-h">See our jewellery move, not just sit still</h2>
+        <p class="lede">Colour options, full sets and statement earrings, filmed so you can see the true sparkle before you ask for a price.</p>
+      </div>
+      <a class="btn btn--light" href="/reels/" data-track="reels_cta_click" data-location="home">Watch the reels</a>
+    </div>
+  </section>
+
   {site.bundle.enabled && (
     <section class="section section--tight bundle-band" aria-labelledby="bundle-h">
       <div class="container bundle-in" data-reveal>
@@ -295,4 +307,9 @@ const homeFaq = generalFaq.slice(0, 5);
   .bundle-in h2 { margin-bottom: var(--s-3); }
   .bundle-in .lede { margin: 0; }
   @media (min-width: 900px) { .bundle-in { grid-template-columns: 1fr auto; } }
+
+  .reels-in { display: grid; gap: var(--s-5); align-items: center; }
+  .reels-in h2 { color: #fff; margin-bottom: var(--s-3); }
+  .reels-in .lede { margin: 0; color: #cfc6b8; }
+  @media (min-width: 900px) { .reels-in { grid-template-columns: 1fr auto; } }
 </style>
