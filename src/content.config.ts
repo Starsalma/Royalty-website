@@ -64,12 +64,17 @@ const products = defineCollection({
       size: z.string().optional(),
       weight: z.string().optional(),
       price: z.number().positive().optional(), // INR. Leave out to show "Ask for price".
+      // Genuine regular price (MRP) in INR, shown struck through when higher than price.
+      compareAtPrice: z.number().positive().optional(),
       availability: z.enum(['in_stock', 'made_to_order', 'out_of_stock']).optional(),
       featured: z.boolean().default(false),
       bestseller: z.boolean().default(false),
       // true = sample listing created during the build. Replace with real products.
       sample: z.boolean().default(false),
       publishedAt: z.coerce.date(),
+    }).refine((d) => d.compareAtPrice === undefined || (d.price !== undefined && d.compareAtPrice > d.price), {
+      message: 'compareAtPrice needs a price and must be higher than it',
+      path: ['compareAtPrice'],
     }),
 });
 

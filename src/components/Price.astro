@@ -1,0 +1,25 @@
+---
+// Selling price, plus the struck-through regular price (MRP) and the discount
+// worked out from the two numbers, so the % shown always matches the prices.
+import { formatPrice } from '../lib/catalog';
+
+interface Props { price?: number; compareAt?: number; size?: 'sm' | 'lg' }
+const { price, compareAt, size = 'sm' } = Astro.props;
+const now = price !== undefined ? formatPrice(price) : null;
+const was = price !== undefined && compareAt !== undefined && compareAt > price ? formatPrice(compareAt) : null;
+const pct = was && price !== undefined && compareAt ? Math.round((1 - price / compareAt) * 100) : 0;
+---
+<p class:list={['price', size]}>
+  {!now && 'Price on request'}
+  {now && <span class="now">{now}</span>}
+  {was && <s class="was"><span class="visually-hidden">Regular price </span>{was}</s>}
+  {was && <span class="off">{pct}% off</span>}
+</p>
+
+<style>
+  .price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--s-2); font-weight: 600; margin: 0 0 var(--s-4); }
+  .sm { font-size: 0.9375rem; }
+  .lg { font-size: 1.25rem; }
+  .was { font-weight: 400; color: var(--muted); font-size: 0.85em; }
+  .off { font-size: 0.72em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8c2f39; }
+</style>

@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { Product } from '../lib/catalog';
-import { formatPrice } from '../lib/catalog';
+import Price from './Price.astro';
 import { productUrl } from '../lib/urls';
 import { whatsappLink, messages } from '../lib/contact';
 import Icon from './Icon.astro';
@@ -32,7 +32,7 @@ const hover = d.images[1];
     <p class="meta">{categoryName}<span aria-hidden="true"> · </span><span class="sku">{d.sku}</span></p>
     <H class="name"><a href={url}>{d.name}</a></H>
     <p class="summary">{d.summary}</p>
-    <p class="price">{d.price ? formatPrice(d.price) : 'Price on request'}</p>
+    <Price price={d.price} compareAt={d.compareAtPrice} />
     <div class="cta">
       <a class="btn btn--whatsapp btn--sm" href={whatsappLink(messages.product(d.name, d.sku))} target="_blank" rel="noopener" data-track="whatsapp_click" data-location="product_card" data-product={d.sku} aria-label={`Ask about ${d.name} on WhatsApp`}>
         <Icon name="whatsapp" /> <span>Ask</span>
@@ -59,7 +59,6 @@ const hover = d.images[1];
   .name a { text-decoration: none; }
   .name a:hover { text-decoration: underline; text-decoration-color: var(--gold); }
   .summary { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.875rem; color: var(--muted); margin-bottom: var(--s-3); }
-  .price { font-weight: 600; font-size: 0.9375rem; margin-bottom: var(--s-4); }
   .cta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); margin-top: auto; }
   .cta .btn { padding: 0 var(--s-2); letter-spacing: 0.08em; }
   @media (max-width: 480px) { .summary { display: none; } }

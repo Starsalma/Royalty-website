@@ -7,7 +7,8 @@ import ProductCard from '../../../components/ProductCard.astro';
 import EnquiryForm from '../../../components/EnquiryForm.astro';
 import FaqList from '../../../components/FaqList.astro';
 import Icon from '../../../components/Icon.astro';
-import { allProducts, allCategories, allCollections, related, formatPrice } from '../../../lib/catalog';
+import Price from '../../../components/Price.astro';
+import { allProducts, allCategories, allCollections, related } from '../../../lib/catalog';
 import { categoryUrl, collectionUrl, productUrl, shopUrl } from '../../../lib/urls';
 import { whatsappLink, messages } from '../../../lib/contact';
 import { product as productSchema, faqPage } from '../../../lib/schema';
@@ -95,7 +96,7 @@ const description = d.seoDescription ?? `${d.summary} Product code ${d.sku}. Ask
       <a class="eyebrow cat" href={categoryUrl(category.id)}>{category.data.name}</a>
       <h1>{d.name}</h1>
       <p class="sku">Product code: <strong>{d.sku}</strong></p>
-      <p class="price">{d.price ? formatPrice(d.price) : 'Price on request'}</p>
+      <Price price={d.price} compareAt={d.compareAtPrice} size="lg" />
       <p class="summary">{d.summary}</p>
 
       <div class="ctas">
@@ -182,7 +183,6 @@ const description = d.seoDescription ?? `${d.summary} Product code ${d.sku}. Ask
   h1 { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin-bottom: var(--s-3); }
   .sku { font-size: 0.8125rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: var(--s-4); }
   .sku strong { color: var(--ink); font-weight: 600; }
-  .price { font-size: 1.25rem; font-weight: 600; margin-bottom: var(--s-4); }
   .summary { font-size: 1.0625rem; color: var(--ink-soft); }
   .ctas { display: grid; gap: var(--s-2); margin: var(--s-6) 0 var(--s-5); }
   .ctas .btn--whatsapp { min-height: 54px; font-size: 0.875rem; }

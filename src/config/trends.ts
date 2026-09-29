@@ -117,7 +117,7 @@ export const trends: Trend[] = [
     image: colourStones,
     imageAlt: 'Illustration of a choker with green and red stones and matching jhumkas',
     photo: false,
-    skus: [],
+    skus: ['RY-NS-229'],
     collection: 'festive-jewellery',
   },
   {
