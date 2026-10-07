@@ -62,6 +62,14 @@ export function faqPage(faq: { q: string; a: string }[]): Json | null {
   };
 }
 
+export function howTo(name: string, steps: { name: string; text: string }[]): Json {
+  return {
+    '@type': 'HowTo',
+    name,
+    step: steps.map((s) => ({ '@type': 'HowToStep', name: s.name, text: s.text })),
+  };
+}
+
 export function itemList(name: string, urls: string[], origin: URL): Json {
   return {
     '@type': 'CollectionPage',

@@ -11,7 +11,7 @@ import Icon from '../components/Icon.astro';
 import { allProducts, allCategories, allCollections, allPosts, inCategory, inCollection } from '../lib/catalog';
 import { categoryUrl, collectionUrl } from '../lib/urls';
 import { whatsappLink, messages } from '../lib/contact';
-import { faqPage } from '../lib/schema';
+import { faqPage, howTo } from '../lib/schema';
 import { generalFaq } from '../config/faq';
 import { site } from '../config/site';
 import { trends } from '../config/trends';
@@ -24,11 +24,16 @@ const featured = products.filter((p) => p.data.featured).slice(0, 8);
 const styles = collections.filter((c) => c.data.group === 'style');
 const occasions = collections.filter((c) => c.data.group === 'occasion');
 const homeFaq = generalFaq.slice(0, 5);
+const orderSteps = [
+  { name: 'Choose a design', text: 'Browse by category, style or occasion and note the product code.' },
+  { name: 'Ask on WhatsApp', text: 'Tap the WhatsApp button. We reply with the price, stock and a video of the piece.' },
+  { name: 'Confirm your order', text: 'Agree on payment and delivery on the same chat. We keep you updated until it reaches you.' },
+];
 ---
 <BaseLayout
   title="Imitation Jewellery Online | Earrings, Sets & Bridal | Royalty"
   description="Kundan, American diamond, temple and oxidised imitation jewellery by Royalty. Earrings, necklace sets, bangles and bridal pieces. Ask price on WhatsApp."
-  schema={[faqPage(homeFaq)]}
+  schema={[faqPage(homeFaq), howTo('How to order from Royalty', orderSteps)]}
 >
   <!-- Hero: what we sell + how to buy, visible within the first screen -->
   <section class="hero">
@@ -189,9 +194,9 @@ const homeFaq = generalFaq.slice(0, 5);
         </div>
       </div>
       <ol class="steps">
-        <li data-reveal><span class="n">01</span><h3>Choose a design</h3><p>Browse by category, style or occasion and note the product code.</p></li>
-        <li data-reveal><span class="n">02</span><h3>Ask on WhatsApp</h3><p>Tap the WhatsApp button. We reply with the price, stock and a video of the piece.</p></li>
-        <li data-reveal><span class="n">03</span><h3>Confirm your order</h3><p>Agree on payment and delivery on the same chat. We keep you updated until it reaches you.</p></li>
+        {orderSteps.map((s, i) => (
+          <li data-reveal><span class="n">{String(i + 1).padStart(2, '0')}</span><h3>{s.name}</h3><p>{s.text}</p></li>
+        ))}
       </ol>
     </div>
   </section>
